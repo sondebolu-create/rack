@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 8">
+<rect x="0.25" y="0.25" width="33.5" height="33.5" rx="16.75" fill="#F6F6F6"/>
+<rect x="0.25" y="0.25" width="33.5" height="33.5" rx="16.75" stroke="#E5E7EB" stroke-width="0.5"/>
+<g id="shopping-bag">
+<path id="Vector" d="M23.75 12.5V23C23.75 23.3978 23.592 23.7794 23.3107 24.0607C23.0294 24.342 22.6478 24.5 22.25 24.5H11.75C11.3522 24.5 10.9706 24.342 10.6893 24.0607C10.408 23.7794 10.25 23.3978 10.25 23V12.5L12.5 9.5H21.5L23.75 12.5ZM10.25 12.5H23.75M20 15.5C20 16.2956 19.6839 17.0587 19.1213 17.6213C18.5587 18.1839 17.7956 18.5 17 18.5C16.2044 18.5 15.4413 18.1839 14.8787 17.6213C14.3161 17.0587 14 16.2956 14 15.5" stroke-linecap="round" stroke-linejoin="round" stroke="#71717A"/>
+</g>
+</g>
+</svg>
