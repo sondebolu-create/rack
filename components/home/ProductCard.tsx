@@ -6,14 +6,23 @@ import { formatPrice } from '@/lib/format';
 import type { ProductCardData } from '@/lib/types';
 
 /** Grey card with a square photo, brand, name and price. Opens the product page. */
-export function ProductCard({ product, className = '' }: { product: ProductCardData; className?: string }) {
+export function ProductCard({
+  product,
+  className = '',
+  onGrey = false,
+}: {
+  product: ProductCardData;
+  className?: string;
+  /** Set when the card sits on a grey (`bg-card`) section, so it turns white to stay visible. */
+  onGrey?: boolean;
+}) {
   const router = useRouter();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${product.name} by ${product.vendorName}, ${formatPrice(product.priceMinor, product.currency)}`}
       onPress={() => router.push(`/product/${product.id}`)}
-      className={`gap-1.5 rounded-md border border-line bg-card p-2 ${className}`}>
+      className={`gap-1.5 rounded-md border border-line p-2 ${onGrey ? 'bg-surface' : 'bg-card'} ${className}`}>
       <Image
         source={product.image}
         accessibilityLabel={product.imageAlt}

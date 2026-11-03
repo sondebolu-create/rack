@@ -22,6 +22,15 @@ export type ProductCardData = {
   sizes: Size[];
 };
 
+/** A colour option on the product page. `hex` is product data (what the item looks like), not a UI token. */
+export type ProductColor = { name: string; hex: string };
+
+/** Everything the product page needs. */
+export type ProductDetail = ProductCardData & {
+  gallery: { source: ImageSource; alt: string }[];
+  colors: ProductColor[];
+};
+
 /** The sponsored slot at the top of Home. */
 export type SponsoredLook = ProductCardData & {
   dressType: string;

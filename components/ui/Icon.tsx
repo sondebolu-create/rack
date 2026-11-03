@@ -17,6 +17,14 @@ const ICONS = {
   x: require('@/assets/icons/x.svg'),
   plus: require('@/assets/icons/plus.svg'),
   pencil: require('@/assets/icons/pencil.svg'),
+  // Product detail (M4). "Light" icons are for dark backgrounds, "dark" ones for light backgrounds.
+  cartLight: require('@/assets/icons/cart-light.svg'),
+  minusCircle: require('@/assets/icons/minus-circle.svg'),
+  plusCircle: require('@/assets/icons/plus-circle.svg'),
+  chevronRight: require('@/assets/icons/chevron-right.svg'),
+  cameraDark: require('@/assets/icons/camera-dark.svg'),
+  upload: require('@/assets/icons/upload.svg'),
+  personStanding: require('@/assets/icons/person-standing.svg'),
 };
 
 export type IconName = keyof typeof ICONS;

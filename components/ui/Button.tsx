@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable } from 'react-native';
 import { colors } from '@/theme';
+import { Icon, type IconName } from './Icon';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -10,6 +11,10 @@ export type ButtonProps = {
   variant?: ButtonVariant;
   /** Adds a trailing arrow. Primary buttons in Figma use it. */
   arrow?: boolean;
+  /** Leading icon (a light one, for the primary variant). */
+  icon?: IconName;
+  /** Defaults to true. Pass false for a button that hugs its content. */
+  fullWidth?: boolean;
   loading?: boolean;
   disabled?: boolean;
   /** Defaults to `label`. */
@@ -34,6 +39,8 @@ export function Button({
   onPress,
   variant = 'primary',
   arrow = false,
+  icon,
+  fullWidth = true,
   loading = false,
   disabled = false,
   accessibilityLabel,
@@ -47,11 +54,12 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
-      className={`h-[50px] w-full flex-row items-center justify-center gap-2.5 rounded-md px-4 ${CONTAINER[variant]} ${inactive ? 'opacity-50' : ''} ${className}`}>
+      className={`h-[50px] ${fullWidth ? 'w-full' : 'self-start'} flex-row items-center justify-center gap-2.5 rounded-md px-4 ${CONTAINER[variant]} ${inactive ? 'opacity-50' : ''} ${className}`}>
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? colors.inverse : colors.ink} />
       ) : (
         <>
+          {icon ? <Icon name={icon} size={16} /> : null}
           <Text weight="medium" className={TEXT[variant]}>
             {label}
           </Text>
