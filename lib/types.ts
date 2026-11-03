@@ -32,3 +32,6 @@ export type SponsoredLook = ProductCardData & {
 export type ExploreTile = Omit<ProductCardData, 'image' | 'imageAlt'> & {
   images: { source: ImageSource; alt: string }[];
 };
+
+/** A RackGPT result: a product plus how closely it matched the request (0-100). */
+export type OutfitMatch = ProductCardData & { matchPercent: number };

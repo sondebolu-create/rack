@@ -1,5 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SizePills } from '@/components/product/SizePills';
 import { Icon } from '@/components/ui/Icon';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
@@ -55,16 +56,7 @@ export function SponsoredHero({ look }: { look: SponsoredLook }) {
           <Text className="text-xs text-primary-hover">{look.dressType}</Text>
         </Fact>
         <Fact label="Available Sizes">
-          <View
-            accessible
-            accessibilityLabel={`Available sizes: ${look.sizes.join(', ')}`}
-            className="flex-row flex-wrap gap-1">
-            {look.sizes.map((s) => (
-              <View key={s} accessible={false} className="rounded-sm bg-strong px-1">
-                <Text className="text-[10px] leading-4 text-primary-hover">{s}</Text>
-              </View>
-            ))}
-          </View>
+          <SizePills sizes={look.sizes} />
         </Fact>
         <Fact label="Location">
           <Text className="text-xs text-primary-hover">{look.location}</Text>

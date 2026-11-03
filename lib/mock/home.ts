@@ -11,6 +11,8 @@ const explore2 = require('@/assets/images/mock/explore-2.png');
 const explore3 = require('@/assets/images/mock/explore-3.png');
 const explore4 = require('@/assets/images/mock/explore-4.png');
 
+export const mockImages = { gown, shirtWhite, shirtGreen, explore1, explore2, explore3, explore4 };
+
 const PRICE = 5_799_900; // ₦57,999.00 in kobo
 
 export const sponsoredLook: SponsoredLook = {

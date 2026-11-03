@@ -1,0 +1,88 @@
+import { Pressable, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { SizePills } from '@/components/product/SizePills';
+import { Icon } from '@/components/ui/Icon';
+import { Image } from '@/components/ui/Image';
+import { Text } from '@/components/ui/Text';
+import { formatPrice } from '@/lib/format';
+import type { OutfitMatch } from '@/lib/types';
+
+export type MatchCardProps = {
+  match: OutfitMatch;
+  added: boolean;
+  onToggleAdded: () => void;
+};
+
+/** G3/G4: one matched product. Add flips to "Added" with a Remove link. */
+export function MatchCard({ match, added, onToggleAdded }: MatchCardProps) {
+  const router = useRouter();
+  const price = formatPrice(match.priceMinor, match.currency);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${match.name} by ${match.vendorName}, ${price}, ${match.matchPercent}% match`}
+      onPress={() => router.push(`/product/${match.id}`)}
+      className="flex-row gap-3 rounded-xl border border-line bg-card p-3">
+      <View className="h-[99px] w-24">
+        <Image
+          source={match.image}
+          accessibilityLabel={match.imageAlt}
+          contentFit="cover"
+          className="h-full w-full rounded-xl"
+        />
+        {/* Figma uses a pale green badge; this one is dark so the white text stays readable on photos. */}
+        <View className="absolute bottom-1.5 left-1.5 rounded-md bg-ink/60 px-1.5 py-0.5">
+          <Text className="text-[10px] leading-[15px] text-inverse">{match.matchPercent}% match</Text>
+        </View>
+      </View>
+
+      <View className="flex-1 justify-between gap-2">
+        <View className="gap-1">
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${match.vendorName} store`}
+            hitSlop={{ top: 14, bottom: 6, left: 8, right: 24 }}
+            onPress={() => router.push(`/store/${match.vendorId}`)}
+            className="self-start">
+            <Text weight="medium" className="text-xs text-primary-hover underline">
+              {match.vendorName}
+            </Text>
+          </Pressable>
+          <Text weight="medium">{match.name}</Text>
+          <SizePills sizes={match.sizes} roomy />
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <Text weight="medium" className="text-base">
+            {price}
+          </Text>
+          <View className="flex-row items-center gap-3">
+            {added ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${match.name}`}
+                hitSlop={14}
+                onPress={onToggleAdded}>
+                <Text className="text-xs text-danger">Remove</Text>
+              </Pressable>
+            ) : null}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={added ? `${match.name} added` : `Add ${match.name}`}
+              accessibilityState={{ disabled: added }}
+              disabled={added}
+              hitSlop={10}
+              onPress={onToggleAdded}
+              className={`flex-row items-center gap-1 rounded-xl px-3 py-1 ${added ? 'bg-strong' : 'bg-primary'}`}>
+              {added ? null : <Icon name="plus" size={12} />}
+              <Text className={`text-xs ${added ? 'text-ink' : 'text-inverse'}`}>
+                {added ? '✓ Added' : 'Add'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}

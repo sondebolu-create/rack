@@ -12,6 +12,7 @@ export const colors: {
   disabled: string;
   interactive: string;
   info: string;
+  success: string;
 };
 export const fontFamily: Record<string, string[]>;
 export const fontSize: Record<string, [string, { lineHeight: string }]>;

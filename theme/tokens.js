@@ -19,6 +19,7 @@ const colors = {
   disabled: '#a1a1aa', // color-icon-disabled, color-text-disabled
   interactive: '#2563eb', // color-icon-interactive
   info: '#eff6ff', // color-bg-info-muted
+  success: '#00c950', // not a Figma variable: the done-step ticks in RackGPT processing (318:2992)
 };
 
 const fontFamily = {

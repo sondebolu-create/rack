@@ -11,6 +11,12 @@ const ICONS = {
   arrowUpRight: require('@/assets/icons/arrow-up-right.svg'),
   arrowRight: require('@/assets/icons/arrow-right.svg'),
   chat: require('@/assets/icons/chat.svg'),
+  paperclip: require('@/assets/icons/paperclip.svg'),
+  camera: require('@/assets/icons/camera.svg'),
+  send: require('@/assets/icons/send.svg'),
+  x: require('@/assets/icons/x.svg'),
+  plus: require('@/assets/icons/plus.svg'),
+  pencil: require('@/assets/icons/pencil.svg'),
 };
 
 export type IconName = keyof typeof ICONS;

@@ -36,6 +36,14 @@
         }
       ],
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Rack uses your photos so RackGPT can find outfits that match them.",
+          "cameraPermission": "Rack uses your camera so RackGPT can find outfits that match a photo you take.",
+          "microphonePermission": false
+        }
+      ],
       "expo-status-bar"
     ],
     "experiments": {
