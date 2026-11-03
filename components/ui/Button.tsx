@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable } from 'react-native';
+import { colors } from '@/theme';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -46,9 +47,9 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
-      className={`min-h-11 w-full flex-row items-center justify-center gap-2 rounded-md px-4 py-3 ${CONTAINER[variant]} ${inactive ? 'opacity-50' : ''} ${className}`}>
+      className={`h-[50px] w-full flex-row items-center justify-center gap-2.5 rounded-md px-4 ${CONTAINER[variant]} ${inactive ? 'opacity-50' : ''} ${className}`}>
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#f3f4f6' : '#09090b'} />
+        <ActivityIndicator color={variant === 'primary' ? colors.inverse : colors.ink} />
       ) : (
         <>
           <Text weight="medium" className={TEXT[variant]}>

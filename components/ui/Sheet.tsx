@@ -22,7 +22,8 @@ export function Sheet({ visible, title, onClose, children, accessibilityLabel }:
       animationType="slide"
       onRequestClose={onClose}
       accessibilityLabel={accessibilityLabel ?? title}>
-      <View className="flex-1 justify-end bg-ink/40">
+      {/* Figma 318:4647 scrim is black at 86%. */}
+      <View className="flex-1 justify-end bg-ink/85">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"
@@ -30,10 +31,10 @@ export function Sheet({ visible, title, onClose, children, accessibilityLabel }:
           className="flex-1"
         />
         <View
-          className="rounded-t-xl bg-surface px-4 pt-2 shadow-sm-strong"
+          className="rounded-t-[14px] bg-surface px-5 pt-3 shadow-sm-strong"
           style={{ paddingBottom: insets.bottom + 16 }}>
-          <View className="mb-3 h-1 w-9 self-center rounded-full bg-strong" accessible={false} />
-          <Text weight="bold" className="mb-3 text-lg" accessibilityRole="header">
+          <View className="h-0.5 w-[108px] self-center rounded-full bg-ink" accessible={false} />
+          <Text weight="medium" className="my-6 text-center text-lg" accessibilityRole="header">
             {title}
           </Text>
           {children}

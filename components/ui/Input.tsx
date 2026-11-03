@@ -1,4 +1,5 @@
 import { TextInput, View, type TextInputProps } from 'react-native';
+import { colors } from '@/theme';
 import { Text } from './Text';
 
 export type InputProps = Omit<TextInputProps, 'className' | 'style'> & {
@@ -20,11 +21,12 @@ export function Input({
 }: InputProps) {
   return (
     <View className={`w-full gap-1 ${className}`}>
-      <Text weight="medium">{label}</Text>
+      <Text>{label}</Text>
       <TextInput
         accessibilityLabel={accessibilityLabel ?? label}
-        placeholderTextColor="#71717a"
-        className={`min-h-11 rounded-md border bg-surface px-3 py-2 font-sans text-sm text-ink ${
+        placeholderTextColor={colors.muted}
+        // Figma input frame: 56pt tall, 16pt padding, 6pt radius.
+        className={`h-14 rounded-md border bg-surface px-4 font-sans text-sm text-ink ${
           error ? 'border-danger' : 'border-line'
         } ${props.editable === false ? 'bg-card opacity-60' : ''}`}
         {...props}

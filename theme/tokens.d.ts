@@ -1,0 +1,19 @@
+export const colors: {
+  ink: string;
+  muted: string;
+  inverse: string;
+  'inverse-icon': string;
+  surface: string;
+  strong: string;
+  line: string;
+  primary: { DEFAULT: string; hover: string };
+  card: string;
+  danger: string;
+  disabled: string;
+  interactive: string;
+  info: string;
+};
+export const fontFamily: Record<string, string[]>;
+export const fontSize: Record<string, [string, { lineHeight: string }]>;
+export const borderRadius: Record<string, string>;
+export const boxShadow: Record<string, string>;

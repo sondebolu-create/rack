@@ -20,6 +20,10 @@ const COLORS = [
   { name: 'primary-hover', hex: '#27272a', bg: 'bg-primary-hover' },
   { name: 'card', hex: '#f4f4f5', bg: 'bg-card' },
   { name: 'danger', hex: '#dc2626', bg: 'bg-danger' },
+  { name: 'disabled', hex: '#a1a1aa', bg: 'bg-disabled' },
+  { name: 'interactive', hex: '#2563eb', bg: 'bg-interactive' },
+  { name: 'info', hex: '#eff6ff', bg: 'bg-info' },
+  { name: 'inverse-icon', hex: '#e5e7eb', bg: 'bg-inverse-icon' },
 ];
 
 const TYPE = [
