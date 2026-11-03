@@ -21,7 +21,7 @@ export function ScreenPlaceholder({ name, req, back, children }: ScreenPlacehold
           {name}
         </Text>
         <Card>
-          <Text className="text-muted">{req ? `Placeholder for ${req}.` : 'Placeholder.'}</Text>
+          <Text className="text-primary-hover">{req ? `Placeholder for ${req}.` : 'Placeholder.'}</Text>
         </Card>
         {children}
       </View>

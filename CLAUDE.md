@@ -100,7 +100,11 @@ Pull a screen with the Figma MCP (`get_design_context`) before building it. Trea
 - **Images:** product images live in the Supabase Storage bucket `product-images`. Always render them with `expo-image`.
 - **Security:** row-level security is on for every table. Shoppers read public catalogue data; vendors write only their own rows.
 - **Secrets:** never commit them. Use `.env` with `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Service keys stay server-side (Edge Functions).
-- **Accessibility:** tap targets at least 44pt, including size chips. Every image gets an `accessibilityLabel`. Muted text on grey cards still needs 4.5:1 contrast.
+- **Accessibility:** tap targets at least 44pt, including size chips. Every image gets an `accessibilityLabel`. Text needs 4.5:1 contrast.
+  - `text-muted` (`#71717a`) passes on `bg-surface` (4.83:1) but **fails on `bg-card` (4.40:1) and `bg-strong` (3.81:1)**. On those backgrounds use `text-primary-hover` (13.6:1 on card) for secondary text, or `text-ink`. Never `text-muted`.
+  - Known exception: input placeholders on `bg-card` (home search, RackGPT composer) use `text-muted` at 4.40:1, because a darker colour reads as typed text. Revisit if we add a `placeholder` token.
+  - `text-disabled` (`#a1a1aa`, about 2.3-2.6:1) is for inactive or out-of-stock states only, never for information the shopper needs. Give the control an `accessibilityLabel` that says what is unavailable.
+  - White text on a photo needs a dark scrim behind it (`bg-ink/50` or darker), not a pale translucent one.
 - **Copy:** use the Figma copy as written. "Rack" is the brand; "Ask Rackgpt" is the floating button label.
 - **Scope:** one feature per session. When done, typecheck, summarise what changed, list anything skipped, and suggest a commit message that cites the requirement ID.
 - **Ask first:** stop and ask before adding a new dependency, changing the schema outside a migration, or building anything not in the MVP.

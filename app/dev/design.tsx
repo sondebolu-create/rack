@@ -108,7 +108,7 @@ export default function DesignSystem() {
       <Section title="Card & shadows">
         <Card>
           <Text weight="medium">Card</Text>
-          <Text className="text-muted">Light grey, rounded-xl</Text>
+          <Text className="text-primary-hover">Light grey, rounded-xl</Text>
         </Card>
         <View className="flex-row gap-3">
           <View className="h-16 flex-1 items-center justify-center rounded-xl bg-surface shadow-sm">
