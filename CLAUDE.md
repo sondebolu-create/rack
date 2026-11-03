@@ -105,6 +105,7 @@ Pull a screen with the Figma MCP (`get_design_context`) before building it. Trea
   - Known exception: input placeholders on `bg-card` (home search, RackGPT composer) use `text-muted` at 4.40:1, because a darker colour reads as typed text. Revisit if we add a `placeholder` token.
   - `text-disabled` (`#a1a1aa`, about 2.3-2.6:1) is for inactive or out-of-stock states only, never for information the shopper needs. Give the control an `accessibilityLabel` that says what is unavailable.
   - White text on a photo needs a dark scrim behind it (`bg-ink/50` or darker), not a pale translucent one.
+  - **Flag contrast fixes, don't apply them.** The substitutions above (`text-primary-hover` for `text-muted` on grey) are the only automatic ones. If any other Figma colour pair fails 4.5:1, keep Figma's colours, and list it in the summary with the node ID, the pair, the ratio and the fix you suggest. The user decides.
 - **Copy:** use the Figma copy as written. "Rack" is the brand; "Ask Rackgpt" is the floating button label.
 - **Scope:** one feature per session. When done, typecheck, summarise what changed, list anything skipped, and suggest a commit message that cites the requirement ID.
 - **Ask first:** stop and ask before adding a new dependency, changing the schema outside a migration, or building anything not in the MVP.
