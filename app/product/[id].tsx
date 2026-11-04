@@ -15,11 +15,10 @@ import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { ScreenPlaceholder } from '@/components/ui/ScreenPlaceholder';
 import { Text } from '@/components/ui/Text';
+import { MAX_QTY, cartItemId, useCartItem, useCartStore, useCartTotals } from '@/lib/cart';
 import { formatPrice } from '@/lib/format';
 import { getProduct } from '@/lib/mock/product';
 import type { ImageSource, ProductDetail, Size } from '@/lib/types';
-
-const MAX_QTY = 10;
 
 export default function Product() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,27 +29,34 @@ export default function Product() {
 
 /**
  * M4 Product detail. Figma 318:4068 (not in cart) and 318:4165 (in cart: stepper + checkout bar).
- * The cart is local state until M6 adds a real one.
+ * "In cart" means the chosen size and colour are in the cart store (M6), the same cart as Cart and the try-on.
  */
 function ProductView({ product }: { product: ProductDetail }) {
   const router = useRouter();
   const [size, setSize] = useState<Size | null>(null);
   const [color, setColor] = useState<string | null>(null);
-  const [qty, setQty] = useState(0);
   const [triedToAdd, setTriedToAdd] = useState(false);
   const [tryOnOpen, setTryOnOpen] = useState(false);
   // The try-on flow (M5) shares size, colour and qty with this screen, so "Add to cart" there is the same cart.
   const [tryOn, setTryOn] = useState<{ photo: ImageSource | null } | null>(null);
 
   const missing = size === null ? 'a size' : color === null ? 'a colour' : null;
+  const addItem = useCartStore((s) => s.add);
+  const setLineQty = useCartStore((s) => s.setQty);
+  const totals = useCartTotals();
+  const lineId = size && color ? cartItemId(product.id, size, color) : null;
+  const qty = useCartItem(lineId)?.qty ?? 0;
   const inCart = qty > 0;
 
   const addToCart = () => {
-    if (missing) {
+    if (missing || !size || !color) {
       setTriedToAdd(true);
       return;
     }
-    setQty(1);
+    addItem(product, size, color);
+  };
+  const setQty = (next: number) => {
+    if (lineId) setLineQty(lineId, next);
   };
 
   const startTryOn = async (method: TryOnMethod) => {
@@ -141,9 +147,10 @@ function ProductView({ product }: { product: ProductDetail }) {
 
       {inCart ? (
         <CheckoutBar
-          totalMinor={product.priceMinor * qty}
-          currency={product.currency}
-          // The checkout flow (M7) does not exist yet, so this lands on the cart tab.
+          // The whole cart, not just this item. Figma does not link the bar anywhere, so it opens the cart,
+          // where "Proceed" starts checkout.
+          totalMinor={totals.subtotalMinor}
+          currency={totals.currency}
           onCheckout={() => router.push('/cart')}
         />
       ) : null}

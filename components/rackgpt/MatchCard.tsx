@@ -4,18 +4,21 @@ import { SizePills } from '@/components/product/SizePills';
 import { Icon } from '@/components/ui/Icon';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
+import { useCartStore } from '@/lib/cart';
 import { formatPrice } from '@/lib/format';
 import type { OutfitMatch } from '@/lib/types';
 
 export type MatchCardProps = {
   match: OutfitMatch;
-  added: boolean;
-  onToggleAdded: () => void;
+  /** Add needs a size and colour, so the parent opens a picker. */
+  onAdd: () => void;
 };
 
-/** G3/G4: one matched product. Add flips to "Added" with a Remove link. */
-export function MatchCard({ match, added, onToggleAdded }: MatchCardProps) {
+/** G3/G4: one matched product. "Added" means it is in the cart; Remove takes every variant of it out. */
+export function MatchCard({ match, onAdd }: MatchCardProps) {
   const router = useRouter();
+  const added = useCartStore((s) => s.items.some((i) => i.product.id === match.id));
+  const removeProduct = useCartStore((s) => s.removeProduct);
   const price = formatPrice(match.priceMinor, match.currency);
 
   return (
@@ -63,7 +66,7 @@ export function MatchCard({ match, added, onToggleAdded }: MatchCardProps) {
                 accessibilityRole="button"
                 accessibilityLabel={`Remove ${match.name}`}
                 hitSlop={14}
-                onPress={onToggleAdded}>
+                onPress={() => removeProduct(match.id)}>
                 <Text className="text-xs text-danger">Remove</Text>
               </Pressable>
             ) : null}
@@ -73,7 +76,7 @@ export function MatchCard({ match, added, onToggleAdded }: MatchCardProps) {
               accessibilityState={{ disabled: added }}
               disabled={added}
               hitSlop={10}
-              onPress={onToggleAdded}
+              onPress={onAdd}
               className={`flex-row items-center gap-1 rounded-xl px-3 py-1 ${added ? 'bg-strong' : 'bg-primary'}`}>
               {added ? null : <Icon name="plus" size={12} />}
               <Text className={`text-xs ${added ? 'text-ink' : 'text-inverse'}`}>

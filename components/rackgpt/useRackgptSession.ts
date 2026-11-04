@@ -48,8 +48,6 @@ export function useRackgptSession() {
     request: s.request,
     step: s.step,
     matches,
-    added: s.added,
-    toggleAdded: s.toggleAdded,
     editRequest: s.editRequest,
   };
 }

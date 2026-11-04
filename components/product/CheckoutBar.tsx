@@ -8,17 +8,24 @@ export type CheckoutBarProps = {
   totalMinor: number;
   currency: Currency;
   onCheckout: () => void;
+  /**
+   * Solid and in the layout flow, for tab screens that put it under a list (RackGPT results, Figma 318:3111).
+   * By default it floats over the page, translucent (Product Detail, Figma 318:4165).
+   */
+  inline?: boolean;
 };
 
-/** Floating bar with the running total and "Checkout" (Figma 318:4165). Sits over the scrolling page. */
-export function CheckoutBar({ totalMinor, currency, onCheckout }: CheckoutBarProps) {
+/** Bar with the running total and "Checkout". */
+export function CheckoutBar({ totalMinor, currency, onCheckout, inline = false }: CheckoutBarProps) {
   const insets = useSafeAreaInsets();
   return (
     <View
-      // Sits above the home indicator, so the offset is computed.
-      style={{ bottom: insets.bottom + 8 }}
+      // Floating: sits above the home indicator, so the offset is computed.
+      style={inline ? undefined : { bottom: insets.bottom + 8 }}
       // bg-ink/60 matches Figma. White text on it stays at 4.8:1 even over a white page.
-      className="absolute inset-x-4 flex-row items-center justify-between rounded-md border-b border-disabled bg-ink/60 px-4 py-2 shadow-sm-strong">
+      className={`flex-row items-center justify-between rounded-md border-b border-disabled px-4 py-2 shadow-sm-strong ${
+        inline ? 'bg-primary' : 'absolute inset-x-4 bg-ink/60'
+      }`}>
       <View accessible accessibilityLabel={`Total amount ${formatPrice(totalMinor, currency)}`} className="gap-1">
         <Text className="text-xs text-inverse">Total Amount</Text>
         <Text weight="medium" className="text-inverse">

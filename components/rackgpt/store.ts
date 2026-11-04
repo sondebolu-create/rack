@@ -12,7 +12,6 @@ type RackgptState = {
   request: Request | null;
   /** Index of the active processing step. Equal to the step count when all are done. */
   step: number;
-  added: ReadonlySet<string>;
 
   setDraft: (text: string) => void;
   setAttachment: (source: ImageSource | null) => void;
@@ -22,17 +21,18 @@ type RackgptState = {
   advance: () => void;
   /** Back to the composer with the last request filled in. */
   editRequest: () => void;
-  toggleAdded: (id: string) => void;
 };
 
-/** RackGPT session (G1-G4). Local UI state only; nothing here is persisted or sent to the server. */
+/**
+ * RackGPT session (G1-G4). Local UI state only; nothing here is persisted or sent to the server.
+ * What is "Added" is not kept here: it is read from the cart store.
+ */
 export const useRackgptStore = create<RackgptState>((set, get) => ({
   composing: true,
   draft: '',
   attachment: null,
   request: null,
   step: 0,
-  added: new Set(),
 
   setDraft: (draft) => set({ draft }),
   setAttachment: (attachment) => set({ attachment }),
@@ -45,7 +45,6 @@ export const useRackgptStore = create<RackgptState>((set, get) => ({
       draft: '',
       attachment: null,
       step: 0,
-      added: new Set(),
       composing: false,
     });
   },
@@ -59,12 +58,4 @@ export const useRackgptStore = create<RackgptState>((set, get) => ({
       ...(request ? { draft: request.text, attachment: request.attachment } : {}),
     });
   },
-
-  toggleAdded: (id) =>
-    set((s) => {
-      const added = new Set(s.added);
-      if (added.has(id)) added.delete(id);
-      else added.add(id);
-      return { added };
-    }),
 }));

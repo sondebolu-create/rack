@@ -1,4 +1,6 @@
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { CheckoutBar } from '@/components/product/CheckoutBar';
 import { Composer } from '@/components/rackgpt/Composer';
 import { EmptyState } from '@/components/rackgpt/EmptyState';
 import { ProcessingPanel } from '@/components/rackgpt/ProcessingPanel';
@@ -8,13 +10,16 @@ import { useRackgptSession } from '@/components/rackgpt/useRackgptSession';
 import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useCartTotals } from '@/lib/cart';
 
 /**
- * RackGPT (G1-G4): empty, attachment, analyzing, results. Figma 318:1332, 318:2424, 318:2975, 318:3038.
+ * RackGPT (G1-G4): empty, attachment, analyzing, results. Figma 318:1332, 318:2424, 318:2975, 318:3038, 318:3111.
  * Processing and matches are mock until the vision model and pgvector land in Week 2.
  */
 export default function RackGpt() {
   const s = useRackgptSession();
+  const router = useRouter();
+  const totals = useCartTotals();
 
   return (
     <Screen back accessibilityLabel="RackGPT">
@@ -48,14 +53,22 @@ export default function RackGpt() {
             </>
           ) : null}
           {s.phase === 'results' && s.request ? (
-            <ResultsView
-              request={s.request}
-              matches={s.matches}
-              added={s.added}
-              onToggleAdded={s.toggleAdded}
-            />
+            <ResultsView request={s.request} matches={s.matches} />
           ) : null}
         </ScrollView>
+
+        {/* G4: once something is in the cart, results show the running total and a way to check out. */}
+        {s.phase === 'results' && totals.count > 0 ? (
+          <View className="pb-2">
+            <CheckoutBar
+              inline
+              totalMinor={totals.subtotalMinor}
+              currency={totals.currency}
+              // Same as Product Detail: the cart, where "Proceed" starts checkout.
+              onCheckout={() => router.push('/cart')}
+            />
+          </View>
+        ) : null}
 
         {s.phase !== 'results' ? (
           <View className="pb-2">

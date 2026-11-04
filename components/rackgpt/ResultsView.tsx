@@ -1,20 +1,21 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
 import type { OutfitMatch } from '@/lib/types';
 import { MatchCard } from './MatchCard';
+import { VariantSheet } from './VariantSheet';
 import type { Request } from './useRackgptSession';
 
 export type ResultsViewProps = {
   request: Request;
   matches: OutfitMatch[];
-  added: ReadonlySet<string>;
-  onToggleAdded: (id: string) => void;
 };
 
 /** G3: what the shopper asked for, then the matches. */
-export function ResultsView({ request, matches, added, onToggleAdded }: ResultsViewProps) {
+export function ResultsView({ request, matches }: ResultsViewProps) {
   const n = matches.length;
+  const [picking, setPicking] = useState<OutfitMatch | null>(null);
   return (
     <View className="gap-4">
       <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
@@ -35,8 +36,10 @@ export function ResultsView({ request, matches, added, onToggleAdded }: ResultsV
       </View>
 
       {matches.map((m) => (
-        <MatchCard key={m.id} match={m} added={added.has(m.id)} onToggleAdded={() => onToggleAdded(m.id)} />
+        <MatchCard key={m.id} match={m} onAdd={() => setPicking(m)} />
       ))}
+
+      <VariantSheet match={picking} onClose={() => setPicking(null)} />
     </View>
   );
 }

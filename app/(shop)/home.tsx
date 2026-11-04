@@ -6,15 +6,17 @@ import { ProductCard } from '@/components/home/ProductCard';
 import { SectionTitle } from '@/components/home/SectionTitle';
 import { SponsoredHero } from '@/components/home/SponsoredHero';
 import { Screen } from '@/components/ui/Screen';
+import { useCartCount } from '@/lib/cart';
 import { exploreTiles, nearbyProducts, sponsoredLook } from '@/lib/mock/home';
 
 /** M2 Home. Figma 318:3193. Data is mock until the catalogue schema exists. */
 export default function Home() {
+  const cartCount = useCartCount();
   return (
     <View className="flex-1 bg-surface">
       <Screen scroll accessibilityLabel="Home">
         <View className="gap-6 pb-16 pt-3">
-          <HomeHeader />
+          <HomeHeader cartHasItems={cartCount > 0} />
           <SponsoredHero look={sponsoredLook} />
 
           <View className="gap-2">
