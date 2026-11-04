@@ -13,6 +13,10 @@ export const colors: {
   interactive: string;
   info: string;
   success: string;
+  'cam-chip': string;
+  'cam-button': string;
+  'cam-line': string;
+  'cam-ring': string;
 };
 export const fontFamily: Record<string, string[]>;
 export const fontSize: Record<string, [string, { lineHeight: string }]>;

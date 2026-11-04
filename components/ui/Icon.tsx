@@ -25,6 +25,13 @@ const ICONS = {
   cameraDark: require('@/assets/icons/camera-dark.svg'),
   upload: require('@/assets/icons/upload.svg'),
   personStanding: require('@/assets/icons/person-standing.svg'),
+  // Try-on camera (M5), drawn in light strokes for the black screen.
+  corner: require('@/assets/icons/corner.svg'),
+  arrowLeftLight: require('@/assets/icons/arrow-left-light.svg'),
+  cameraLight: require('@/assets/icons/camera-light.svg'),
+  uploadLight: require('@/assets/icons/upload-light.svg'),
+  check: require('@/assets/icons/check.svg'),
+  flipCamera: require('@/assets/icons/flip-camera.svg'),
 };
 
 export type IconName = keyof typeof ICONS;
@@ -34,13 +41,16 @@ export type IconProps = {
   size: number;
   /** Omit for decorative icons that sit inside an already-labelled control. */
   accessibilityLabel?: string;
+  /** Recolours the icon (expo-image tint). For dynamic colours only, such as a check on a product-coloured dot. */
+  tintColor?: string;
 };
 
-export function Icon({ name, size, accessibilityLabel }: IconProps) {
+export function Icon({ name, size, accessibilityLabel, tintColor }: IconProps) {
   return (
     <ExpoImage
       source={ICONS[name]}
       contentFit="contain"
+      tintColor={tintColor}
       // Dynamic size, so it is the one place a style object is allowed.
       style={{ width: size, height: size }}
       accessible={accessibilityLabel !== undefined}

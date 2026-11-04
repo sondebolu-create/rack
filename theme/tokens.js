@@ -20,6 +20,11 @@ const colors = {
   interactive: '#2563eb', // color-icon-interactive
   info: '#eff6ff', // color-bg-info-muted
   success: '#00c950', // not a Figma variable: the done-step ticks in RackGPT processing (318:2992)
+  // Try-on camera frames (318:4681, 318:4736). Raw fills, not Figma variables. Added on request, not from a Figma variable.
+  'cam-chip': '#0c0c0c', // size chips
+  'cam-button': '#171717', // round Upload / Capture buttons
+  'cam-line': '#3b3b3b', // borders on those buttons and the swatches
+  'cam-ring': '#c7c7c7', // selected size chip border
 };
 
 const fontFamily = {

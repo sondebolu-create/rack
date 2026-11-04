@@ -37,6 +37,14 @@
       ],
       "expo-image",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Rack uses your camera so you can see how a piece looks on you.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Rack uses your photos so RackGPT can find outfits that match them.",
