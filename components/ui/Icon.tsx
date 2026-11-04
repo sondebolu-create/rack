@@ -32,6 +32,18 @@ const ICONS = {
   uploadLight: require('@/assets/icons/upload-light.svg'),
   check: require('@/assets/icons/check.svg'),
   flipCamera: require('@/assets/icons/flip-camera.svg'),
+  // Cart, checkout and order tracking (M6-M9). "Dark" icons are for light backgrounds.
+  minusCircleDark: require('@/assets/icons/minus-circle-dark.svg'),
+  plusCircleDark: require('@/assets/icons/plus-circle-dark.svg'),
+  plusDark: require('@/assets/icons/plus-dark.svg'),
+  calendar: require('@/assets/icons/calendar.svg'),
+  lock: require('@/assets/icons/lock.svg'),
+  mapPin: require('@/assets/icons/map-pin.svg'),
+  creditCard: require('@/assets/icons/credit-card.svg'),
+  checkBig: require('@/assets/icons/check-big.svg'),
+  receipt: require('@/assets/icons/receipt.svg'),
+  dotOff: require('@/assets/icons/dot-off.svg'),
+  dotOn: require('@/assets/icons/dot-on.svg'),
 };
 
 export type IconName = keyof typeof ICONS;
