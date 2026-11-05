@@ -12,7 +12,7 @@ const COLORS: ProductColor[] = [
   { name: 'Red', hex: '#c10007' },
 ];
 
-const CATALOGUE: ProductCardData[] = [sponsoredLook, ...nearbyProducts, ...rackgptMatches];
+export const CATALOGUE: ProductCardData[] = [sponsoredLook, ...nearbyProducts, ...rackgptMatches];
 
 export function getProduct(id: string | undefined): ProductDetail | undefined {
   const base = CATALOGUE.find((p) => p.id === id);

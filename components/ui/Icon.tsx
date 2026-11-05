@@ -44,6 +44,12 @@ const ICONS = {
   receipt: require('@/assets/icons/receipt.svg'),
   dotOff: require('@/assets/icons/dot-off.svg'),
   dotOn: require('@/assets/icons/dot-on.svg'),
+  // Brand store category tabs (M3).
+  catAll: require('@/assets/icons/cat-all.svg'),
+  catShoes: require('@/assets/icons/cat-shoes.svg'),
+  catGowns: require('@/assets/icons/cat-gowns.svg'),
+  catJewelry: require('@/assets/icons/cat-jewelry.svg'),
+  catCorporate: require('@/assets/icons/cat-corporate.svg'),
 };
 
 export type IconName = keyof typeof ICONS;

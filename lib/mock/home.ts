@@ -18,7 +18,7 @@ const PRICE = 5_799_900; // ₦57,999.00 in kobo
 export const sponsoredLook: SponsoredLook = {
   id: 'p-gown',
   vendorId: 'v-fashion-nova',
-  vendorName: 'Fashion Nova',
+  vendorName: 'Adire House',
   name: 'Elegant Gown',
   priceMinor: PRICE,
   currency: 'NGN',
@@ -33,7 +33,7 @@ export const nearbyProducts: ProductCardData[] = [
   {
     id: 'p-drews-shirt',
     vendorId: 'v-fashion-nova',
-    vendorName: 'Fashion Nova',
+    vendorName: 'Adire House',
     name: 'Drew’s Shirt',
     priceMinor: PRICE,
     currency: 'NGN',
@@ -55,7 +55,7 @@ export const nearbyProducts: ProductCardData[] = [
   {
     id: 'p-elegant-gown',
     vendorId: 'v-fashion-nova',
-    vendorName: 'Fashion Nova',
+    vendorName: 'Adire House',
     name: 'Elegant Gown',
     priceMinor: PRICE,
     currency: 'NGN',
@@ -69,7 +69,7 @@ export const exploreTiles: ExploreTile[] = [
   {
     id: 'e-1',
     vendorId: 'v-fashion-nova',
-    vendorName: 'Fashion Nova',
+    vendorName: 'Adire House',
     name: 'Elegant Gown',
     priceMinor: PRICE,
     currency: 'NGN',
@@ -84,7 +84,7 @@ export const exploreTiles: ExploreTile[] = [
   {
     id: 'e-2',
     vendorId: 'v-fashion-nova',
-    vendorName: 'Fashion Nova',
+    vendorName: 'Adire House',
     name: 'Elegant Gown',
     priceMinor: PRICE,
     currency: 'NGN',
