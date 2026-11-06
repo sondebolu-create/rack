@@ -21,13 +21,20 @@ export function MatchCard({ match, onAdd }: MatchCardProps) {
   const removeProduct = useCartStore((s) => s.removeProduct);
   const price = formatPrice(match.priceMinor, match.currency);
 
+  const openProduct = () => router.push(`/product/${match.id}`);
+
+  // The card is a plain View, not a Pressable: it holds other buttons (store, Remove, Add), and a button inside
+  // a button is invalid HTML on web. The photo and the name are the two ways into the product page.
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${match.name} by ${match.vendorName}, ${price}, ${match.matchPercent}% match`}
-      onPress={() => router.push(`/product/${match.id}`)}
-      className="flex-row gap-3 rounded-xl border border-line bg-card p-3">
-      <View className="h-[99px] w-24">
+    <View className="flex-row gap-3 rounded-xl border border-line bg-card p-3">
+      {/* Pointer-only duplicate of the name link below, so it stays out of the keyboard and screen-reader order. */}
+      <Pressable
+        aria-hidden
+        tabIndex={-1}
+        accessible={false}
+        importantForAccessibility="no"
+        onPress={openProduct}
+        className="h-[99px] w-24">
         <Image
           source={match.image}
           accessibilityLabel={match.imageAlt}
@@ -38,7 +45,7 @@ export function MatchCard({ match, onAdd }: MatchCardProps) {
         <View className="absolute bottom-1.5 left-1.5 rounded-md bg-ink/60 px-1.5 py-0.5">
           <Text className="text-[10px] leading-[15px] text-inverse">{match.matchPercent}% match</Text>
         </View>
-      </View>
+      </Pressable>
 
       <View className="flex-1 justify-between gap-2">
         <View className="gap-1">
@@ -52,7 +59,13 @@ export function MatchCard({ match, onAdd }: MatchCardProps) {
               {match.vendorName}
             </Text>
           </Pressable>
-          <Text weight="medium">{match.name}</Text>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${match.name} by ${match.vendorName}, ${price}, ${match.matchPercent}% match`}
+            onPress={openProduct}
+            className="self-start">
+            <Text weight="medium">{match.name}</Text>
+          </Pressable>
           <SizePills sizes={match.sizes} roomy />
         </View>
 
@@ -86,6 +99,6 @@ export function MatchCard({ match, onAdd }: MatchCardProps) {
           </View>
         </View>
       </View>
-    </Pressable>
+    </View>
   );
 }

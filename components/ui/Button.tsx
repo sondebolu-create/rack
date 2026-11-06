@@ -23,9 +23,9 @@ export type ButtonProps = {
 };
 
 const CONTAINER: Record<ButtonVariant, string> = {
-  primary: 'bg-primary active:bg-primary-hover border border-primary',
-  secondary: 'bg-surface border border-line active:bg-card',
-  ghost: 'bg-transparent border border-transparent active:bg-card',
+  primary: 'bg-primary hover:bg-primary-hover active:bg-primary-hover border border-primary',
+  secondary: 'bg-surface border border-line hover:bg-card active:bg-card',
+  ghost: 'bg-transparent border border-transparent hover:bg-card active:bg-card',
 };
 
 const TEXT: Record<ButtonVariant, string> = {

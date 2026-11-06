@@ -20,7 +20,7 @@ export function Chip({
   accessibilityLabel,
   className = '',
 }: ChipProps) {
-  const tone = selected ? 'bg-primary border-primary' : 'bg-surface border-line';
+  const tone = selected ? 'bg-primary border-primary' : 'bg-surface border-line hover:bg-card';
   return (
     <Pressable
       accessibilityRole="button"
