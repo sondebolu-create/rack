@@ -32,6 +32,8 @@ const fontFamily = {
   sans: ['CabinetGrotesk-Regular'],
   'sans-medium': ['CabinetGrotesk-Medium'],
   'sans-bold': ['CabinetGrotesk-Bold'],
+  // Figma "SF Mono" on the Rack wordmark and the splash tagline (318:3428, 318:3450). System font, iOS only.
+  mono: ['Menlo'],
 };
 
 // Tailwind's defaults, except lg: Figma text-lg is 18/30.

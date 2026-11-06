@@ -50,6 +50,12 @@ const ICONS = {
   catGowns: require('@/assets/icons/cat-gowns.svg'),
   catJewelry: require('@/assets/icons/cat-jewelry.svg'),
   catCorporate: require('@/assets/icons/cat-corporate.svg'),
+  // Onboarding and log in (M1), drawn in light strokes for the dark photo screens.
+  onbCart: require('@/assets/icons/onboarding-cart.svg'),
+  onbStore: require('@/assets/icons/onboarding-store.svg'),
+  onbArrow: require('@/assets/icons/onboarding-arrow.svg'),
+  google: require('@/assets/icons/google.svg'),
+  logoHanger: require('@/assets/icons/logo-hanger.svg'),
 };
 
 export type IconName = keyof typeof ICONS;
