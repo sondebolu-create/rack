@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CheckoutBar } from '@/components/product/CheckoutBar';
 import { Composer } from '@/components/rackgpt/Composer';
@@ -8,6 +8,7 @@ import { ResultsView } from '@/components/rackgpt/ResultsView';
 import { UserMessage } from '@/components/rackgpt/UserMessage';
 import { useRackgptSession } from '@/components/rackgpt/useRackgptSession';
 import { Icon } from '@/components/ui/Icon';
+import { KeyboardAvoid } from '@/components/ui/KeyboardAvoid';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useCartTotals } from '@/lib/cart';
@@ -23,7 +24,7 @@ export default function RackGpt() {
 
   return (
     <Screen back accessibilityLabel="RackGPT">
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
+      <KeyboardAvoid>
         <View className="-mx-4 flex-row items-center justify-between border-b border-line px-4 pb-4 pt-2">
           <Text className="text-xl" accessibilityRole="header">
             RackGPT
@@ -84,7 +85,7 @@ export default function RackGpt() {
             />
           </View>
         ) : null}
-      </KeyboardAvoidingView>
+      </KeyboardAvoid>
     </Screen>
   );
 }

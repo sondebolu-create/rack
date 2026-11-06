@@ -60,7 +60,7 @@ export function TryOnFlow({
   };
 
   return (
-    <View accessibilityViewIsModal className="absolute inset-0 z-50 bg-black">
+    <View accessibilityViewIsModal aria-modal className="absolute inset-0 z-50 bg-black">
       <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-black">
         {photo ? (

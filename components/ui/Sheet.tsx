@@ -26,7 +26,9 @@ export function Sheet({ visible, title, onClose, children, accessibilityLabel, f
       onRequestClose={onClose}
       accessibilityLabel={accessibilityLabel ?? title}>
       {/* Figma 318:4647 scrim is black at 86%. */}
-      <View className="flex-1 justify-end bg-ink/85">
+      <View className="flex-1 items-center bg-ink/85">
+       {/* Modal fills the whole browser window on web, so cap the sheet at phone width like AppFrame. */}
+       <View className="w-full max-w-[480px] flex-1 justify-end">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"
@@ -46,6 +48,7 @@ export function Sheet({ visible, title, onClose, children, accessibilityLabel, f
           )}
           {children}
         </View>
+       </View>
       </View>
     </Modal>
   );

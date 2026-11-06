@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
+import { KeyboardAvoid } from '@/components/ui/KeyboardAvoid';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 
 export type FlowScreenProps = {
   title?: string;
+  /** Browser tab title, for screens with no visible title (Order Confirmed). */
+  pageTitle?: string;
   subtitle?: string;
   /** Hide for screens with no way back, like Order Confirmed. */
   back?: boolean;
@@ -18,11 +21,11 @@ export type FlowScreenProps = {
 };
 
 /** Shared frame for Cart, Checkout, Review, Confirmed and Track: Back, title, scrolling body, pinned button. */
-export function FlowScreen({ title, subtitle, back = true, cta, footer, children }: FlowScreenProps) {
+export function FlowScreen({ title, pageTitle, subtitle, back = true, cta, footer, children }: FlowScreenProps) {
   const insets = useSafeAreaInsets();
   return (
-    <Screen back={back} accessibilityLabel={title}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
+    <Screen back={back} accessibilityLabel={title} pageTitle={pageTitle}>
+      <KeyboardAvoid>
         <ScrollView
           className="flex-1"
           keyboardShouldPersistTaps="handled"
@@ -44,7 +47,7 @@ export function FlowScreen({ title, subtitle, back = true, cta, footer, children
             <Button label={cta.label} arrow disabled={cta.disabled} onPress={cta.onPress} />
           </View>
         ) : null}
-      </KeyboardAvoidingView>
+      </KeyboardAvoid>
     </Screen>
   );
 }

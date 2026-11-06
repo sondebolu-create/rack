@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, Linking, Pressable, View } from 'react-native';
+import { ActivityIndicator, AppState, Linking, Platform, Pressable, View } from 'react-native';
 import { CameraView, useCameraPermissions, type CameraType } from 'expo-camera';
 import { cssInterop } from 'nativewind';
 import { pickPhoto } from '@/components/rackgpt/pickPhoto';
@@ -31,6 +31,13 @@ export type CameraStepProps = {
   onClose: () => void;
 };
 
+/**
+ * Browsers only expose the camera on HTTPS (or localhost). On plain HTTP `navigator.mediaDevices` is missing,
+ * so offer Upload instead of a camera that can never start.
+ */
+const cameraMissing =
+  Platform.OS === 'web' && (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia);
+
 /** Delay so the iOS permission alert does not collide with the AR Try On sheet sliding away. */
 const PROMPT_DELAY_MS = 450;
 
@@ -56,7 +63,7 @@ export function CameraStep({
 
   const status = permission?.status;
   useEffect(() => {
-    if (!askForCamera || status !== 'undetermined') return;
+    if (cameraMissing || !askForCamera || status !== 'undetermined') return;
     const t = setTimeout(() => void requestPermission(), PROMPT_DELAY_MS);
     return () => clearTimeout(t);
   }, [askForCamera, status, requestPermission]);
@@ -102,7 +109,9 @@ export function CameraStep({
 
       <View className="mt-5 flex-1">
         <Corners>
-          {permission === null ? (
+          {cameraMissing ? (
+            <PermissionPanel mode="unavailable" canAskAgain={false} onAllow={() => {}} onUpload={upload} />
+          ) : permission === null ? (
             <View className="flex-1 items-center justify-center">
               <ActivityIndicator color={colors.inverse} accessibilityLabel="Checking camera access" />
             </View>
@@ -216,26 +225,34 @@ function RoundAction({
 /** Shown in the viewfinder until camera access is granted. Upload still works without it. */
 function PermissionPanel({
   canAskAgain,
+  mode = 'permission',
   onAllow,
   onUpload,
 }: {
   canAskAgain: boolean;
+  /** `unavailable`: the browser has no camera API (not HTTPS), so only Upload is offered. */
+  mode?: 'permission' | 'unavailable';
   onAllow: () => void;
   onUpload: () => void;
 }) {
   return (
     <View accessible accessibilityLiveRegion="polite" className="flex-1 items-center justify-center gap-3 px-4">
       <Text weight="medium" className="text-center text-base text-inverse">
-        {canAskAgain ? 'Allow camera access' : 'Camera access is off'}
+        {mode === 'unavailable' ? 'Camera not available' : canAskAgain ? 'Allow camera access' : 'Camera access is off'}
       </Text>
       <Text className="text-center text-inverse">
-        {canAskAgain
-          ? 'Rack needs your camera to show how this piece looks on you.'
-          : 'Turn on camera access for Rack in Settings, or upload a photo from your media instead.'}
+        {mode === 'unavailable'
+          ? 'Your browser only allows the camera on a secure (HTTPS) connection. Upload a photo from your media instead.'
+          : canAskAgain
+            ? 'Rack needs your camera to show how this piece looks on you.'
+            : Platform.OS === 'web'
+              ? "Allow camera access for this site in your browser's site settings, then reload. Or upload a photo from your media instead."
+              : 'Turn on camera access for Rack in Settings, or upload a photo from your media instead.'}
       </Text>
-      {canAskAgain ? (
+      {mode === 'unavailable' ? null : canAskAgain ? (
         <Button label="Allow camera" fullWidth={false} onPress={onAllow} />
-      ) : (
+      ) : Platform.OS === 'web' ? null : (
+        // Linking.openSettings() has no web equivalent; browsers don't let a page open their site settings.
         <Button label="Open Settings" fullWidth={false} onPress={() => void Linking.openSettings()} />
       )}
       <Button label="Upload from media" variant="secondary" fullWidth={false} onPress={onUpload} />

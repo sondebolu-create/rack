@@ -75,6 +75,8 @@ function ProductView({ product }: { product: ProductDetail }) {
     <View className="flex-1 bg-surface">
       <View
         className="flex-1"
+        // aria-hidden covers web; the other two are the iOS and Android equivalents.
+        aria-hidden={tryOn !== null}
         accessibilityElementsHidden={tryOn !== null}
         importantForAccessibility={tryOn !== null ? 'no-hide-descendants' : 'auto'}>
         <Screen back scroll accessibilityLabel={product.name}>

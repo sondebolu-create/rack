@@ -26,6 +26,7 @@ export default function OrderConfirmed() {
       <Stack.Screen options={{ gestureEnabled: false }} />
       <FlowScreen
         back={false}
+        pageTitle="Order confirmed"
         cta={{ label: 'Track Order', onPress: () => router.push(`/order/${order.id}/track`) }}
         footer={
           <Pressable
