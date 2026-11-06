@@ -8,7 +8,7 @@ Rack is an agentic fashion marketplace for Lagos. Shoppers describe, upload or p
 
 ## Stack
 
-- **App:** Expo (latest SDK) + TypeScript (strict) + Expo Router (file-based routes in `app/`)
+- **App:** Expo (latest SDK) + TypeScript (strict) + Expo Router (file-based routes in `app/`). **Rack launches as a web app first**, and iOS (Expo Go / TestFlight) is the other target. Web output is `single` (one `index.html`, client-rendered).
 - **Styling:** NativeWind v4. Use Tailwind classes only. No inline style objects except for dynamic values such as animated or computed sizes.
 - **Backend:** Supabase for Postgres, Auth, Storage and pgvector. Schema changes go through migrations in `supabase/migrations/`, never ad-hoc SQL.
 - **State and data:** TanStack Query for server state; Zustand only for local UI state (cart drawer, RackGPT session).
@@ -20,6 +20,8 @@ Rack is an agentic fashion marketplace for Lagos. Shoppers describe, upload or p
 ```bash
 npx expo start              # dev server
 npx expo start --ios        # iOS simulator
+npx expo start --web        # browser (use this to check every screen, see Platforms)
+npm run web:build           # regenerate public/index.html + manifest from theme/tokens.js, then export to dist/
 npx tsc --noEmit            # typecheck. Run it before saying a task is done
 npx expo lint               # lint
 supabase migration new <name>
@@ -31,11 +33,17 @@ supabase gen types typescript --linked > lib/database.types.ts
 
 ```
 app/                  Expo Router routes
-  (auth)/             onboarding, login
-  (shop)/             tabs: home, rackgpt, cart, orders
-  store/[id].tsx      brand store
-  product/[id].tsx    product detail
-components/ui/        primitives (Button, Chip, Input, Sheet, Card)
+  (shopper)/          everything a shopper sees. Its layout wraps it in AppFrame (phone width, centred)
+    (auth)/           onboarding, login
+    (shop)/           tabs: home, rackgpt, cart, orders
+    store/[id].tsx    brand store
+    product/[id].tsx  product detail
+    checkout, review, order/[id]
+  (vendor)/           future vendor area: full width, built on SidebarLayout, outside AppFrame
+  dev/                dev-only screens (design reference, SidebarLayout demo)
+public/               web only: index.html + manifest.webmanifest (generated, commit them), icons/
+scripts/              generate-web-files.js (theme colours -> public/)
+components/ui/        primitives (Button, Chip, Input, Sheet, Card, AppFrame, SidebarLayout, KeyboardAvoid)
 components/<feature>/ feature components (home, product, rackgpt, checkout)
 lib/                  supabase client, queries, types, utils
 supabase/migrations/  SQL migrations
@@ -94,6 +102,15 @@ Pull a screen with the Figma MCP (`get_design_context`) before building it. Trea
 | RackGPT: results, added | `318:3038`, `318:3111` | G3, G4 |
 
 ## Rules
+
+- **Platforms:** every new screen must work on iOS **and in a mobile browser** (390px wide). Vendor screens must also work at desktop width (1440px) using `SidebarLayout`. Shopper screens stay at phone width inside `AppFrame` on every device; do not design a desktop layout for them yet. Before saying a screen is done, open it with `npx expo start --web` at 390px (and 1440px for vendor screens) and check the console is clean.
+  - **Native-only APIs need a web fallback.** That includes `expo-camera`, `expo-image-picker`, `Linking.openSettings`, `Alert`, `BackHandler`, `KeyboardAvoidingView`, haptics and anything iOS-only like `accessibilityElementsHidden` or `automaticallyAdjustKeyboardInsets`. Use a `.web.ts(x)` file when behaviour differs (see `pickPhoto.web.ts`, `KeyboardAvoid.web.tsx`), and `Platform.select`/`Platform.OS` only for copy or one-line differences. The `.web` file must export the same API.
+  - **Photos:** go through `pickPhoto`. On web it is a file input, and browsers only open it from inside a tap, so call it straight from the press handler with no `await` first. The live camera needs HTTPS (localhost is fine); `CameraStep` falls back to Upload without it.
+  - **No Pressable inside a Pressable.** It is a button inside a button in HTML, and breaks keyboard and screen-reader use. Make the container a View and give it separate pressable parts.
+  - **Don't put padding or margin classes on `SafeAreaView`.** On web it writes inline padding that overrides them. Put them on a child View (see `Screen`).
+  - **Hide what is behind an overlay with `aria-hidden`** as well as the native props.
+  - Every screen sets its browser tab title: `Screen` and `FlowScreen` do it from `accessibilityLabel`/`title`, others call `usePageTitle`.
+  - Hover states use existing tokens only (`hover:bg-primary-hover`, `hover:bg-card`).
 
 - **Money:** store as integers in minor units (`price_minor`) with a `currency` column. The default is `NGN`. Format through `lib/format.ts` only. Never use floats for money.
 - **Sizes:** the enum is `XS, S, M, L, XL, XXL`. Stock is tracked per product + size + colour (a variant).
