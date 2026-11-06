@@ -22,6 +22,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
+      {/* (shopper) adds the phone-width frame; a future (vendor) group will use SidebarLayout instead. */}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }} />
     </SafeAreaProvider>
   );
