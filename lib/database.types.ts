@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.18"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       order_fulfillments: {
@@ -475,9 +500,12 @@ export type Database = {
       owns_product: { Args: { p_product_id: string }; Returns: boolean }
       owns_shop: { Args: { p_shop_id: string }; Returns: boolean }
       owns_shop_folder: { Args: { p_folder: string }; Returns: boolean }
-      slug_available: { Args: { p_shop_id?: string; p_slug: string }; Returns: boolean }
       place_order: { Args: { delivery: Json; items: Json }; Returns: string }
       product_is_public: { Args: { p_product_id: string }; Returns: boolean }
+      slug_available: {
+        Args: { p_shop_id?: string; p_slug: string }
+        Returns: boolean
+      }
       vendor_has_order: { Args: { p_order_id: string }; Returns: boolean }
     }
     Enums: {
@@ -625,6 +653,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       application_status: ["pending", "approved", "rejected"],

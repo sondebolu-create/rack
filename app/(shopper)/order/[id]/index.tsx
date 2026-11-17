@@ -20,7 +20,7 @@ export default function OrderConfirmed() {
   const [receiptOpen, setReceiptOpen] = useState(false);
   if (q.isLoading || q.isError) {
     return (
-      <FlowScreen back={false} pageTitle="Order confirmed">
+      <FlowScreen back={false} pageTitle="Order reserved">
         <QueryState
           isLoading={q.isLoading}
           isError={q.isError}
@@ -52,7 +52,7 @@ export default function OrderConfirmed() {
       <Stack.Screen options={{ gestureEnabled: false }} />
       <FlowScreen
         back={false}
-        pageTitle="Order confirmed"
+        pageTitle="Order reserved"
         cta={{ label: 'Track Order', onPress: () => router.push(`/order/${order.id}/track`) }}
         footer={
           <Pressable
@@ -72,9 +72,9 @@ export default function OrderConfirmed() {
           </View>
           <View accessible accessibilityRole="header" className="items-center gap-1">
             <Text weight="medium" className="text-xl">
-              Your order has been confirmed
+              Your order is reserved
             </Text>
-            <Text className="text-muted">Thank you for your purchase</Text>
+            <Text className="text-muted">The vendor will contact you to arrange delivery and payment.</Text>
           </View>
         </View>
 
@@ -120,7 +120,7 @@ export default function OrderConfirmed() {
           </View>
           <View className="flex-row items-center justify-between border-t border-line pt-2">
             <Text weight="medium" className="text-xs text-primary-hover">
-              Total Paid
+              Total
             </Text>
             <Text weight="medium" className="text-xs">
               {formatPrice(order.total_minor, order.currency)}
