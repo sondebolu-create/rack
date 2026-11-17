@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { PROCESSING_STEPS, rackgptMatches } from '@/lib/mock/rackgpt';
-import type { OutfitMatch } from '@/lib/types';
+import { useStandInMatches } from '@/lib/queries/products';
+import { PROCESSING_STEPS } from './steps';
 import { pickPhoto, type PhotoSource } from './pickPhoto';
 import { useRackgptStore } from './store';
 
@@ -34,7 +34,8 @@ export function useRackgptSession() {
 
   const removeAttachment = useCallback(() => useRackgptStore.getState().setAttachment(null), []);
 
-  const matches: OutfitMatch[] = rackgptMatches;
+  // TODO(G2, Week 2): the vision model and pgvector matching replace this. Until then the "matches" are the newest real products.
+  const matches = useStandInMatches().data ?? [];
 
   return {
     phase,

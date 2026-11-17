@@ -2,27 +2,26 @@ import { View } from 'react-native';
 import { Sheet } from '@/components/ui/Sheet';
 import { Text } from '@/components/ui/Text';
 import { formatDateTime, formatPrice } from '@/lib/format';
-import type { Order } from '@/lib/orders';
+import type { PlacedOrder } from '@/lib/queries/orders';
 
 /** Simple receipt for "View Receipt". There is no Figma frame for it, so it reuses the sheet and card styles. */
-export function ReceiptSheet({ order, visible, onClose }: { order: Order; visible: boolean; onClose: () => void }) {
-  const payment =
-    order.payment === 'transfer' ? 'Bank Transfer' : order.card ? `${order.card.brand} xxxx-${order.card.last4}` : 'Card';
+export function ReceiptSheet({ order, visible, onClose }: { order: PlacedOrder; visible: boolean; onClose: () => void }) {
   return (
     <Sheet visible={visible} title="Receipt" onClose={onClose}>
       <View className="gap-3 pb-4">
-        <Line label={`Order #${order.id}`} value={formatDateTime(order.createdAt)} />
+        <Line label={`Order #${order.order_number}`} value={formatDateTime(Date.parse(order.created_at))} />
         <View className="gap-2 rounded-md bg-card p-3">
           {order.items.map((i) => (
             <Line
               key={i.id}
-              label={`${i.product.name} (${i.size}, ${i.color}) × ${i.qty}`}
-              value={formatPrice(i.product.priceMinor * i.qty, i.product.currency)}
+              label={`${i.product_name} (${i.size}, ${i.colour_name}) × ${i.quantity}`}
+              value={formatPrice(i.unit_price_minor * i.quantity, order.currency)}
             />
           ))}
         </View>
-        <Line label="Payment" value={payment} />
-        <Line label="Total Paid" value={formatPrice(order.totalMinor, order.currency)} strong />
+        {/* TODO(payments): show the payment method and "Paid" once Paystack records it. */}
+        <Line label="Payment" value="Awaiting payment" />
+        <Line label="Total" value={formatPrice(order.total_minor, order.currency)} strong />
       </View>
     </Sheet>
   );

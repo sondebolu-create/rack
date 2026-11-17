@@ -15,16 +15,41 @@ import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { ScreenPlaceholder } from '@/components/ui/ScreenPlaceholder';
 import { Text } from '@/components/ui/Text';
-import { MAX_QTY, cartItemId, useCartItem, useCartStore, useCartTotals } from '@/lib/cart';
+import { maxQtyFor, useCartItem, useCartStore, useCartTotals } from '@/lib/cart';
+import { useProduct } from '@/lib/queries/products';
 import { formatPrice } from '@/lib/format';
-import { getProduct } from '@/lib/mock/product';
 import type { ImageSource, ProductDetail, Size } from '@/lib/types';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { QueryState } from '@/components/ui/QueryState';
 
 export default function Product() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const product = getProduct(id);
-  if (!product) return <ScreenPlaceholder name="Product not found" req="M4" back />;
-  return <ProductView product={product} />;
+  const q = useProduct(id);
+  if (q.isLoading) {
+    return (
+      <Screen back accessibilityLabel="Loading product">
+        <View className="gap-4 pt-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="aspect-square w-full rounded-xl" />
+          <Skeleton className="h-20 w-full rounded-xl" />
+        </View>
+      </Screen>
+    );
+  }
+  if (q.isError) {
+    return (
+      <Screen back accessibilityLabel="Product">
+        <View className="pt-4">
+          <QueryState isLoading={false} isError onRetry={() => void q.refetch()} isEmpty={false} skeleton={null} emptyText="">
+            {null}
+          </QueryState>
+        </View>
+      </Screen>
+    );
+  }
+  if (!q.data) return <ScreenPlaceholder name="Product not found" req="M4" back />;
+  return <ProductView product={q.data} />;
 }
 
 /**
@@ -44,7 +69,25 @@ function ProductView({ product }: { product: ProductDetail }) {
   const addItem = useCartStore((s) => s.add);
   const setLineQty = useCartStore((s) => s.setQty);
   const totals = useCartTotals();
-  const lineId = size && color ? cartItemId(product.id, size, color) : null;
+  // Real stock for database products. Mock products have no variants and are always available.
+  const stockFor = (sz: Size, c: string) =>
+    product.variants ? (product.variants.find((v) => v.size === sz && v.color === c)?.stock ?? 0) : Infinity;
+  const sizeSoldOut = (sz: Size) =>
+    !!product.variants && !(color ? stockFor(sz, color) > 0 : product.variants.some((v) => v.size === sz && v.stock > 0));
+  const colorSoldOut = (c: string) =>
+    !!product.variants && !(size ? stockFor(size, c) > 0 : product.variants.some((v) => v.color === c && v.stock > 0));
+  const pickSize = (next: Size) => {
+    setSize(next);
+    // Drop a colour that this size doesn't come in, rather than leave a sold-out pair selected.
+    if (color && stockFor(next, color) <= 0) setColor(null);
+  };
+  const pickColor = (next: string) => {
+    setColor(next);
+    if (size && stockFor(size, next) <= 0) setSize(null);
+  };
+  const available = size && color ? stockFor(size, color) : Infinity;
+  const variant = size && color ? product.variants?.find((v) => v.size === size && v.color === color) : undefined;
+  const lineId = variant?.id ?? null;
   const qty = useCartItem(lineId)?.qty ?? 0;
   const inCart = qty > 0;
 
@@ -53,7 +96,9 @@ function ProductView({ product }: { product: ProductDetail }) {
       setTriedToAdd(true);
       return;
     }
-    addItem(product, size, color);
+    if (available <= 0) return; // sold out: the pills and swatches are disabled, this is the backstop
+    if (!variant) return;
+    addItem(product, variant.id, size, color, 1, variant.stock);
   };
   const setQty = (next: number) => {
     if (lineId) setLineQty(lineId, next);
@@ -115,11 +160,11 @@ function ProductView({ product }: { product: ProductDetail }) {
               <View className="flex-row items-start justify-between">
                 <View>
                   <Text className="text-xs text-primary-hover">Select size</Text>
-                  <SizePills sizes={product.sizes} selected={size} onSelect={setSize} />
+                  <SizePills sizes={product.allSizes ?? product.sizes} selected={size} onSelect={pickSize} isDisabled={sizeSoldOut} />
                 </View>
                 <View className="items-end">
                   <Text className="text-xs text-primary-hover">Select color</Text>
-                  <ColorSwatches colors={product.colors} selected={color} onSelect={setColor} />
+                  <ColorSwatches colors={product.colors} selected={color} onSelect={pickColor} isDisabled={colorSoldOut} />
                 </View>
               </View>
               {triedToAdd && missing ? (
@@ -132,7 +177,7 @@ function ProductView({ product }: { product: ProductDetail }) {
             <View className="flex-row items-center justify-between px-1">
               <Text className="text-lg">{formatPrice(product.priceMinor, product.currency)}</Text>
               {inCart ? (
-                <QuantityStepper value={qty} max={MAX_QTY} onChange={setQty} />
+                <QuantityStepper value={qty} max={maxQtyFor({ stock: variant?.stock })} onChange={setQty} />
               ) : (
                 <Button label="Add to cart" icon="cartLight" fullWidth={false} onPress={addToCart} />
               )}
@@ -169,8 +214,8 @@ function ProductView({ product }: { product: ProductDetail }) {
           initialPhoto={tryOn.photo}
           size={size}
           color={color}
-          onSelectSize={setSize}
-          onSelectColor={setColor}
+          onSelectSize={pickSize}
+          onSelectColor={pickColor}
           inCart={inCart}
           qty={qty}
           onAddToCart={addToCart}

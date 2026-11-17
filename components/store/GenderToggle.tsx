@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { Image } from '@/components/ui/Image';
-import type { Gender, GenderFilter } from '@/lib/mock/store';
+import type { Gender, GenderFilter } from '@/lib/categories';
 
 const SPRITE = require('@/assets/images/gender-icons.png');
 

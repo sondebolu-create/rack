@@ -29,6 +29,15 @@ export type ProductColor = { name: string; hex: string };
 export type ProductDetail = ProductCardData & {
   gallery: { source: ImageSource; alt: string }[];
   colors: ProductColor[];
+  /**
+   * Real stock per size + colour, for products from the database. Mock products leave it out and are always in
+   * stock. When present, `allSizes` lists every size the product comes in, sold out or not.
+   */
+  variants?: { id: string; size: Size; color: string; stock: number }[];
+  allSizes?: Size[];
+  /** For "similar products" and the store link. */
+  category?: string;
+  shopId?: string;
 };
 
 /** The sponsored slot at the top of Home. */

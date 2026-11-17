@@ -6,7 +6,8 @@ export type PaymentMethod = 'card' | 'transfer';
 
 export type Address = { id: string; line1: string; line2: string };
 
-// TEMPORARY address book (M7). Replaced by the shopper's saved addresses once Supabase has them.
+// TEMPORARY address book (M7). Not backed by a table yet: addresses live on this device only, and the chosen one is
+// copied onto the order by place_order. Replace with saved addresses when the schema has them.
 const MOCK_ADDRESSES: Address[] = [
   { id: 'addr-1', line1: '90, ifekowajo street via kemta', line2: 'Lagos' },
   { id: 'addr-2', line1: '14 Admiralty Way, Lekki Phase 1', line2: 'Lekki, Lagos' },
@@ -18,6 +19,9 @@ type CheckoutState = {
   addresses: Address[];
   addressId: string | null;
   payment: PaymentMethod;
+  /** Who the order is for and how the vendor reaches them. Prefilled from the profile. */
+  contactName: string;
+  contactPhone: string;
   /** Brand and last 4 only. The full card number and CVV never leave the form. */
   card: CardSummary | null;
 
@@ -25,6 +29,7 @@ type CheckoutState = {
   selectAddress: (id: string) => void;
   /** Saves a typed address, selects it and returns it. */
   addAddress: (line1: string) => Address;
+  setContact: (c: { name?: string; phone?: string }) => void;
   setPayment: (m: PaymentMethod) => void;
   setCard: (card: CardSummary | null) => void;
   reset: () => void;
@@ -36,6 +41,8 @@ export const useCheckoutStore = create<CheckoutState>((set, get) => ({
   addresses: MOCK_ADDRESSES,
   addressId: null,
   payment: 'card',
+  contactName: '',
+  contactPhone: '',
   card: null,
 
   setDelivery: (delivery) => set({ delivery }),
@@ -45,6 +52,7 @@ export const useCheckoutStore = create<CheckoutState>((set, get) => ({
     set((s) => ({ addresses: [address, ...s.addresses], addressId: address.id }));
     return address;
   },
+  setContact: (c) => set((s) => ({ contactName: c.name ?? s.contactName, contactPhone: c.phone ?? s.contactPhone })),
   setPayment: (payment) => set({ payment }),
   setCard: (card) => set({ card }),
   // Keeps the address book; clears what belongs to one order.

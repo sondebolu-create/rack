@@ -7,18 +7,44 @@ import { Icon } from '@/components/ui/Icon';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
 import { formatDate, formatPrice } from '@/lib/format';
-import { useOrder, useOrdersStore } from '@/lib/orders';
+import { QueryState } from '@/components/ui/QueryState';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useOrderDetail } from '@/lib/queries/orders';
 
 /** M8 Order Confirmed. Figma 318:4474. */
 export default function OrderConfirmed() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const order = useOrder(id);
+  const q = useOrderDetail(id);
+  const order = q.data;
   const [receiptOpen, setReceiptOpen] = useState(false);
+  if (q.isLoading || q.isError) {
+    return (
+      <FlowScreen back={false} pageTitle="Order confirmed">
+        <QueryState
+          isLoading={q.isLoading}
+          isError={q.isError}
+          onRetry={() => void q.refetch()}
+          isEmpty={false}
+          emptyText=""
+          skeleton={
+            <View className="items-center gap-4 pt-8">
+              <Skeleton className="h-[105px] w-[109px] rounded-full" />
+              <Skeleton className="h-6 w-56" />
+              <Skeleton className="h-24 w-full" />
+            </View>
+          }>
+          {null}
+        </QueryState>
+      </FlowScreen>
+    );
+  }
   if (!order) return <Redirect href="/home" />;
 
-  const units = order.items.reduce((n, i) => n + i.qty, 0);
-  const pickup = order.delivery === 'pickup';
+  const units = order.items.reduce((n, i) => n + i.quantity, 0);
+  const pickup = order.delivery_address === 'Store pick-up';
+  // Not stored on the order: a simple estimate from when it was placed.
+  const estimatedAt = Date.parse(order.created_at) + (pickup ? 1 : 3) * 24 * 60 * 60 * 1000;
 
   return (
     <>
@@ -54,22 +80,7 @@ export default function OrderConfirmed() {
 
         <View className="gap-2">
           <View className="flex-row items-center justify-between">
-            <Text weight="medium">Order #{order.id}</Text>
-            {pickup ? null : order.addressFlagged ? (
-              <Text accessibilityLiveRegion="polite" className="text-xs">
-                Address flagged
-              </Text>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Flag Address"
-                hitSlop={{ top: 14, bottom: 14, left: 12, right: 0 }}
-                onPress={() => useOrdersStore.getState().flagAddress(order.id)}>
-                <Text weight="medium" className="text-xs text-danger underline">
-                  Flag Address
-                </Text>
-              </Pressable>
-            )}
+            <Text weight="medium">Order #{order.order_number}</Text>
           </View>
           <View className="gap-2 rounded-lg bg-card p-2">
             <View className="flex-row items-start justify-between gap-4">
@@ -78,14 +89,14 @@ export default function OrderConfirmed() {
               </Text>
               <Text weight="medium" className="text-xs">
                 {pickup ? 'Ready ' : 'Arrives '}
-                {formatDate(order.estimatedDeliveryAt)}
+                {formatDate(estimatedAt)}
               </Text>
             </View>
             <View className="flex-row items-start justify-between gap-4">
               <Text weight="medium" className="text-primary-hover">
                 {pickup ? 'Collection' : 'Delivery Address'}
               </Text>
-              <Text className="flex-1 text-right">{pickup ? 'Store pick-up' : (order.address?.line1 ?? '')}</Text>
+              <Text className="flex-1 text-right">{pickup ? 'Store pick-up' : order.delivery_address}</Text>
             </View>
           </View>
         </View>
@@ -99,10 +110,10 @@ export default function OrderConfirmed() {
               {order.items.map((i) => (
                 <Image
                   key={i.id}
-                  source={i.product.image}
-                  accessibilityLabel={`${i.product.name}, size ${i.size}, ${i.color}, quantity ${i.qty}`}
+                  source={i.photo ? { uri: i.photo } : undefined}
+                  accessibilityLabel={`${i.product_name}, size ${i.size}, ${i.colour_name}, quantity ${i.quantity}`}
                   contentFit="cover"
-                  className="h-[67px] w-[63px] rounded-lg"
+                  className="h-[67px] w-[63px] rounded-lg bg-strong"
                 />
               ))}
             </View>
@@ -112,7 +123,7 @@ export default function OrderConfirmed() {
               Total Paid
             </Text>
             <Text weight="medium" className="text-xs">
-              {formatPrice(order.totalMinor, order.currency)}
+              {formatPrice(order.total_minor, order.currency)}
             </Text>
           </View>
         </View>

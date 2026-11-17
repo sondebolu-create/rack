@@ -404,7 +404,7 @@ select t.reset();
 -- state now: variant1 stock 4 (shop1), variant3 stock 2 (shop2); shop1 fulfillment 'confirmed'
 select t.as_user(:V1);
 select t.check('vendor cancels own fulfillment',
-  t.try($q$ update public.order_fulfillments set status = 'cancelled' where shop_id = '10000000-0000-0000-0000-000000000001' $q$) = 'ok:1');
+  t.try($q$ update public.order_fulfillments set status = 'cancelled', cancel_reason = 'Out of stock' where shop_id = '10000000-0000-0000-0000-000000000001' $q$) = 'ok:1');
 select t.reset();
 select t.check('cancelling restored that shop''s stock (4 + 3 = 7)', (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000001') = 7);
 select t.check('...and left the other shop''s stock alone', (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000003') = 2);
@@ -419,6 +419,8 @@ select t.reset();
 select t.check('stock was restored exactly once (still 7)', (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000001') = 7);
 
 select t.as_user(:V2);
+select t.check('vendor cannot skip confirming (reserved -> shipped)', t.try($q$ update public.order_fulfillments set status = 'shipped' where shop_id = '10000000-0000-0000-0000-000000000002' $q$) = 'err:22023');
+select t.check('vendor confirms own fulfillment', t.try($q$ update public.order_fulfillments set status = 'confirmed' where shop_id = '10000000-0000-0000-0000-000000000002' $q$) = 'ok:1');
 select t.check('vendor ships own fulfillment', t.try($q$ update public.order_fulfillments set status = 'shipped' where shop_id = '10000000-0000-0000-0000-000000000002' $q$) = 'ok:1');
 select t.check('a shipped fulfillment cannot be cancelled',
   t.try($q$ update public.order_fulfillments set status = 'cancelled' where shop_id = '10000000-0000-0000-0000-000000000002' $q$) = 'err:22023');
@@ -436,7 +438,7 @@ select t.reset();
 select t.check('order2 reserved stock (2 -> 1)', (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000003') = 1);
 select t.as_user(:V2);
 select t.check('vendor cancels order2''s only fulfillment',
-  t.try($q$ update public.order_fulfillments set status = 'cancelled'
+  t.try($q$ update public.order_fulfillments set status = 'cancelled', cancel_reason = 'Changed mind'
             where order_id = (select v::uuid from t.state where k = 'order2') $q$) = 'ok:1');
 select t.reset();
 select t.check('...stock back to 2', (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000003') = 2);
@@ -507,6 +509,116 @@ select t.as_anon();
 select t.check('anyone can read bucket files', t.count('select 1 from storage.objects') >= 1);
 select t.check('anon cannot upload', t.try($q$ insert into storage.objects (bucket_id, name) values ('product-images', '10000000-0000-0000-0000-000000000001/x.jpg') $q$) = 'err:42501');
 select t.reset();
+
+-- ------------------------------------------------------------------ application photos (private bucket)
+insert into storage.objects (bucket_id, name) values ('application-photos', '00000000-0000-0000-0000-0000000000c2/a.jpg');
+select t.as_user(:S1);
+select t.check('applicant can upload into own folder', t.try($q$ insert into storage.objects (bucket_id, name) values ('application-photos', '00000000-0000-0000-0000-0000000000c1/a.jpg') $q$) = 'ok:1');
+select t.check('applicant cannot upload into another user''s folder', t.try($q$ insert into storage.objects (bucket_id, name) values ('application-photos', '00000000-0000-0000-0000-0000000000c2/b.jpg') $q$) = 'err:42501');
+select t.check('applicant reads only own application photos', t.count($q$ select 1 from storage.objects where bucket_id = 'application-photos' $q$) = 1);
+select t.reset();
+select t.as_user(:A);
+select t.check('admin reads all application photos', t.count($q$ select 1 from storage.objects where bucket_id = 'application-photos' $q$) = 2);
+select t.reset();
+select t.as_anon();
+select t.check('anon cannot read application photos', t.count($q$ select 1 from storage.objects where bucket_id = 'application-photos' $q$) = 0);
+select t.reset();
+select t.check('an application cannot list more than 3 photos',
+  t.try($q$ insert into public.vendor_applications (user_id, business_name, phone, city, sample_photo_urls)
+            values ('00000000-0000-0000-0000-0000000000c1', 'Many', '1', 'Lagos', array['a','b','c','d']) $q$) = 'err:23514');
+
+-- ------------------------------------------------------------------ shop setup: slugs + publish guard
+insert into public.shops (id, owner_id, name, slug, status, city, categories) values
+  ('10000000-0000-0000-0000-0000000000d1', :V1, 'Setup Shop', 'setup-shop', 'draft', 'Lagos', array['gowns']);
+select t.as_user(:V1);
+select t.check('slug_available: taken by another vendor''s draft shop is reported taken', public.slug_available('test-brand-draft') = false);
+select t.check('slug_available: own slug is available to itself', public.slug_available('setup-shop', '10000000-0000-0000-0000-0000000000d1') = true);
+select t.check('slug_available: a free slug is available', public.slug_available('totally-free') = true);
+select t.check('vendor cannot publish a shop with no published product',
+  t.try($q$ update public.shops set status = 'live' where id = '10000000-0000-0000-0000-0000000000d1' $q$) = 'err:22023');
+select t.reset();
+select t.as_anon();
+select t.check('anon cannot call slug_available', t.try($q$ select public.slug_available('x') $q$) = 'err:42501');
+select t.reset();
+insert into public.products (id, shop_id, name, category, price_minor, status) values
+  ('20000000-0000-0000-0000-0000000000d1', '10000000-0000-0000-0000-0000000000d1', 'Setup Gown', 'gowns', 1000, 'draft');
+select t.as_user(:V1);
+select t.check('a draft product does not unlock publishing',
+  t.try($q$ update public.shops set status = 'live' where id = '10000000-0000-0000-0000-0000000000d1' $q$) = 'err:22023');
+select t.reset();
+update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000d1';
+select t.as_user(:V1);
+select t.check('vendor can publish once a product is published',
+  t.try($q$ update public.shops set status = 'live' where id = '10000000-0000-0000-0000-0000000000d1' $q$) = 'ok:1');
+select t.reset();
+update public.shops set status = 'draft', city = '' where id = '10000000-0000-0000-0000-0000000000d1';
+select t.as_user(:V1);
+select t.check('vendor cannot publish without a city',
+  t.try($q$ update public.shops set status = 'live' where id = '10000000-0000-0000-0000-0000000000d1' $q$) = 'err:22023');
+select t.reset();
+select t.as_user(:A);
+select t.check('admin is exempt from the publish guard',
+  t.try($q$ update public.shops set status = 'live' where id = '10000000-0000-0000-0000-0000000000d1' $q$) = 'ok:1');
+select t.reset();
+
+-- ------------------------------------------------------------------ product publish guard
+insert into public.products (id, shop_id, name, category, price_minor, status) values
+  ('20000000-0000-0000-0000-0000000000e1', :SH1, 'Guard Draft', 'gowns', 1000, 'draft'),
+  ('20000000-0000-0000-0000-0000000000e2', :SH1, 'Guard Free', 'gowns', 0, 'draft');
+select t.as_user(:V1);
+select t.check('cannot publish a product with no photo or variant',
+  t.try($q$ update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000e1' $q$) = 'err:22023');
+select t.reset();
+insert into public.product_images (product_id, url, alt, position) values ('20000000-0000-0000-0000-0000000000e1', 'https://x.test/e1.jpg', 'e1', 0);
+select t.as_user(:V1);
+select t.check('a photo alone is not enough to publish',
+  t.try($q$ update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000e1' $q$) = 'err:22023');
+select t.reset();
+insert into public.product_variants (product_id, size, colour_name, colour_hex, stock) values ('20000000-0000-0000-0000-0000000000e1', 'M', 'Black', '#000000', 0);
+select t.as_user(:V1);
+select t.check('a variant with zero stock does not unlock publishing',
+  t.try($q$ update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000e1' $q$) = 'err:22023');
+select t.reset();
+update public.product_variants set stock = 4 where product_id = '20000000-0000-0000-0000-0000000000e1';
+select t.as_user(:V1);
+select t.check('publishes once price, photo and stocked variant exist',
+  t.try($q$ update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000e1' $q$) = 'ok:1');
+select t.check('a published product may sell out afterwards',
+  t.try($q$ update public.product_variants set stock = 0 where product_id = '20000000-0000-0000-0000-0000000000e1' $q$) = 'ok:1');
+select t.check('cannot publish a free product',
+  t.try($q$ update public.products set status = 'published' where id = '20000000-0000-0000-0000-0000000000e2' $q$) = 'err:22023');
+select t.reset();
+
+-- ------------------------------------------------------------------ vendor orders: lifecycle across two shops
+select t.as_user(:S1);
+insert into t.state select 'order4', public.place_order(
+  '[{"variant_id":"30000000-0000-0000-0000-000000000001","quantity":1},
+    {"variant_id":"30000000-0000-0000-0000-000000000003","quantity":1}]'::jsonb,
+  '{"name":"Ada Obi","phone":"08031234567","address":"1 Marina","city":"Lagos"}'::jsonb)::text;
+select t.reset();
+select t.check('new fulfillments start with a history entry',
+  (select count(*) from public.order_fulfillments where order_id = (select v::uuid from t.state where k = 'order4') and history ? 'reserved') = 2);
+select t.as_user(:V1);
+select t.check('shop 1 confirms', t.try($q$ update public.order_fulfillments set status = 'confirmed' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'ok:1');
+select t.check('shop 1 ships', t.try($q$ update public.order_fulfillments set status = 'shipped' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'ok:1');
+select t.check('cannot move shipped back to confirmed', t.try($q$ update public.order_fulfillments set status = 'confirmed' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'err:22023');
+select t.check('shop 1 delivers', t.try($q$ update public.order_fulfillments set status = 'delivered' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'ok:1');
+select t.check('cannot move delivered back to reserved', t.try($q$ update public.order_fulfillments set status = 'reserved' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'err:22023');
+select t.reset();
+select t.as_user(:V2);
+select t.check('cancelling needs a reason', t.try($q$ update public.order_fulfillments set status = 'cancelled' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'err:22023');
+select t.check('a blank reason does not count', t.try($q$ update public.order_fulfillments set status = 'cancelled', cancel_reason = '   ' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'err:22023');
+select t.check('shop 2 cancels with a reason', t.try($q$ update public.order_fulfillments set status = 'cancelled', cancel_reason = 'Item damaged' where order_id = (select v::uuid from t.state where k = 'order4') $q$) = 'ok:1');
+select t.reset();
+select t.as_user(:S1);
+select t.check('shopper sees both shops'' timelines, each with its own status',
+  (select count(*) from public.order_fulfillments where order_id = (select v::uuid from t.state where k = 'order4')) = 2
+  and exists (select 1 from public.order_fulfillments where order_id = (select v::uuid from t.state where k = 'order4') and status = 'delivered' and history ? 'shipped' and history ? 'delivered')
+  and exists (select 1 from public.order_fulfillments where order_id = (select v::uuid from t.state where k = 'order4') and status = 'cancelled' and cancel_reason = 'Item damaged'));
+select t.reset();
+select t.check('shop 2''s stock came back, shop 1''s did not',
+  (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000003') = 2
+  and (select stock from public.product_variants where id = '30000000-0000-0000-0000-000000000001') = 6);
 
 -- ------------------------------------------------------------------ summary
 do $$

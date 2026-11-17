@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AddressSheet } from '@/components/checkout/AddressSheet';
@@ -7,6 +7,9 @@ import { FlowScreen } from '@/components/checkout/FlowScreen';
 import { IconBadge } from '@/components/checkout/PinBadge';
 import { RadioRow } from '@/components/checkout/Radio';
 import { Icon } from '@/components/ui/Icon';
+import { Input } from '@/components/ui/Input';
+import { internationalDigits } from '@/lib/phone';
+import { useProfile } from '@/lib/queries/profile';
 import { Text } from '@/components/ui/Text';
 import { summariseCard, validateCard, type CardErrors, type CardFields } from '@/lib/card';
 import { useCartStore } from '@/lib/cart';
@@ -18,7 +21,14 @@ const EMPTY_CARD: CardFields = { name: '', number: '', expiry: '', cvv: '' };
 export default function Checkout() {
   const router = useRouter();
   const hasItems = useCartStore((s) => s.items.length > 0);
-  const { delivery, payment, setDelivery, setPayment, setCard } = useCheckoutStore();
+  const { delivery, payment, setDelivery, setPayment, setCard, contactName, contactPhone, setContact } = useCheckoutStore();
+  const profile = useProfile();
+  const [contactErrors, setContactErrors] = useState<{ name?: string; phone?: string }>({});
+  // Prefill name and phone from the profile once, and never over something the shopper already typed.
+  useEffect(() => {
+    const p = profile.data;
+    if (p && !contactName && !contactPhone) setContact({ name: p.full_name ?? '', phone: p.phone ?? '' });
+  }, [profile.data, contactName, contactPhone, setContact]);
   const address = useSelectedAddress();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -33,7 +43,11 @@ export default function Checkout() {
     setTried(true);
     const errors = payment === 'card' ? validateCard(card) : {};
     setCardErrors(errors);
-    if (needsAddress || Object.keys(errors).length > 0) return;
+    const contact: { name?: string; phone?: string } = {};
+    if (contactName.trim().length < 2) contact.name = 'Enter the name for this order.';
+    if (!internationalDigits(contactPhone)) contact.phone = 'Enter a phone number the seller can call, like 0803 123 4567.';
+    setContactErrors(contact);
+    if (needsAddress || Object.keys(errors).length > 0 || Object.keys(contact).length > 0) return;
     setCard(payment === 'card' ? summariseCard(card) : null);
     router.push('/review');
   };
@@ -48,6 +62,34 @@ export default function Checkout() {
 
   return (
     <FlowScreen title="Checkout" cta={{ label: 'Review Order', onPress: review }}>
+      {/* Not in Figma: place_order needs a name and a phone number, and the seller calls or WhatsApps it to arrange delivery. */}
+      <View className="gap-3">
+        <Text weight="medium">Contact</Text>
+        <Input
+          label="Full name"
+          value={contactName}
+          onChangeText={(name) => {
+            setContact({ name });
+            setContactErrors({});
+          }}
+          error={contactErrors.name}
+          autoComplete="name"
+          textContentType="name"
+        />
+        <Input
+          label="Phone number"
+          value={contactPhone}
+          onChangeText={(phone) => {
+            setContact({ phone });
+            setContactErrors({});
+          }}
+          error={contactErrors.phone}
+          keyboardType="phone-pad"
+          autoComplete="tel"
+          textContentType="telephoneNumber"
+        />
+      </View>
+
       <View className="gap-2">
         <Text weight="medium">Delivery method</Text>
         <View accessibilityRole="radiogroup" accessibilityLabel="Delivery method" className="rounded-md bg-card px-4 py-1">

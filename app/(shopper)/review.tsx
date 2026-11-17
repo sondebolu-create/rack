@@ -8,13 +8,18 @@ import { IconBadge } from '@/components/checkout/PinBadge';
 import { Text } from '@/components/ui/Text';
 import { useCartStore } from '@/lib/cart';
 import { useCheckoutStore, useSelectedAddress } from '@/lib/checkout';
-import { useOrdersStore } from '@/lib/orders';
+import { useProfile } from '@/lib/queries/profile';
+import { usePlaceOrder, type PlaceOrderError } from '@/lib/queries/orders';
+import { Button } from '@/components/ui/Button';
 
-/** M8 Review Order. Figma 318:4386. "Proceed to Payment" places a local order: payment is mock until Paystack. */
+/** M8 Review Order. Figma 318:4386. "Proceed to Payment" calls place_order. Payment itself is mock until Paystack (Week 3). */
 export default function Review() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
-  const { delivery, payment, card } = useCheckoutStore();
+  const { delivery, payment, card, contactName, contactPhone } = useCheckoutStore();
+  const profile = useProfile();
+  const place = usePlaceOrder();
+  const [failure, setFailure] = useState<PlaceOrderError | null>(null);
   const address = useSelectedAddress();
   const [sheetOpen, setSheetOpen] = useState(false);
   // Set once the order is placed, so the emptied cart does not flash an empty state while the screen leaves.
@@ -31,27 +36,48 @@ export default function Review() {
 
   const missingAddress = delivery === 'delivery' && address === null;
 
-  const placeOrder = () => {
-    if (missingAddress) return;
-    const order = useOrdersStore.getState().place({
+  const placeOrder = async () => {
+    if (missingAddress || place.isPending) return;
+    setFailure(null);
+    const pickup = delivery === 'pickup';
+    // The address book keeps "line, city" in two fields; the order stores the city on its own.
+    const city = (!pickup && address?.line2.split(',').pop()?.trim()) || profile.data?.city || 'Lagos';
+    const result = await place.mutateAsync({
       items,
-      delivery,
-      address: delivery === 'delivery' ? address : null,
-      payment,
-      card: payment === 'card' ? card : null,
+      delivery: { name: contactName.trim(), phone: contactPhone.trim(), address: pickup ? 'Store pick-up' : (address?.line1 ?? ''), city },
     });
+    if ('error' in result) {
+      setFailure(result.error);
+      return;
+    }
     setPlaced(true);
     useCartStore.getState().clear();
     useCheckoutStore.getState().reset();
     // Leave Cart, Checkout and Review behind, so Back from the confirmation never returns to them.
     router.dismissAll();
-    router.push(`/order/${order.id}`);
+    router.push(`/order/${result.id}`);
   };
+
+  // Which line failed, so the message can name it: "Elegant Gown (M, Black): only 1 left".
+  const failedItem = failure && 'variantId' in failure ? items.find((i) => i.id === failure.variantId) : undefined;
 
   return (
     <FlowScreen
       title="Review Order"
-      cta={{ label: 'Proceed to Payment', onPress: placeOrder, disabled: missingAddress }}>
+      cta={{ label: place.isPending ? 'Placing order…' : 'Proceed to Payment', onPress: () => void placeOrder(), disabled: missingAddress || place.isPending }}>
+      {failure ? (
+        <View accessibilityRole="alert" className="gap-2 rounded-lg border border-danger p-3">
+          <Text weight="medium">
+            {failure.kind === 'out_of_stock' || failure.kind === 'unavailable'
+              ? failedItem
+                ? `${failedItem.product.name} (${failedItem.size}, ${failedItem.color}) ${failure.kind === 'out_of_stock' ? 'is short on stock' : 'is no longer for sale'}.`
+                : 'An item in your cart is no longer available.'
+              : 'Your order was not placed.'}
+          </Text>
+          <Text>{failure.message}</Text>
+          {failure.kind !== 'other' ? <Button label="Update my cart" variant="secondary" fullWidth={false} onPress={() => router.navigate('/cart')} /> : null}
+        </View>
+      ) : null}
       <View className="gap-2">
         <SectionHeader label="Items" onEdit={() => router.navigate('/cart')} />
         {items.map((item) => (

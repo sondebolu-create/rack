@@ -26,13 +26,15 @@ export type BackHeaderProps = {
   below?: ReactNode;
   /** Sits at the right of the title row, such as the gender toggles. */
   right?: ReactNode;
+  /** Hide the Back link (for an embedded preview). Defaults to true. */
+  back?: boolean;
 };
 
 /** Back link, then a title row with optional content under and beside the title (Figma 318:3828). */
-export function BackHeader({ title, below, right }: BackHeaderProps) {
+export function BackHeader({ title, below, right, back = true }: BackHeaderProps) {
   return (
     <View>
-      <BackLink />
+      {back ? <BackLink /> : null}
       <View className="flex-row items-center justify-between gap-2">
         <View className="flex-1 gap-1">
           <Text weight="medium" accessibilityRole="header" className="text-xl">

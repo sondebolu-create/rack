@@ -1,6 +1,6 @@
 import { ActivityIndicator, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
-import { PROCESSING_STEPS } from '@/lib/mock/rackgpt';
+import { PROCESSING_STEPS } from './steps';
 import { colors } from '@/theme';
 import { STEP_COUNT } from './useRackgptSession';
 

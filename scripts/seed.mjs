@@ -1,5 +1,5 @@
 // Seeds the hosted project with 3 invented brands, their shops and 18 products, using the
-// bundled mock photos. Safe to re-run: it replaces the seed shops' products each time.
+// photos in scripts/seed-assets. Safe to re-run: it replaces the seed shops' products each time.
 //
 //   SUPABASE_SERVICE_ROLE_KEY=<key> node --env-file=.env scripts/seed.mjs --yes
 //
@@ -26,12 +26,12 @@ if (!process.argv.includes('--yes')) {
 }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const MOCK = join(root, 'assets/images/mock');
+const MOCK = join(root, 'scripts/seed-assets');
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
 // ---------------------------------------------------------------------------- photos
-// file -> alt text (same wording as lib/mock/home.ts)
+// file -> alt text (from the original Home mock data)
 const PHOTOS = {
   gown: ['look-gown.jpg', 'Woman in a peach tiered ruffle gown'],
   green1: ['explore-1.png', 'Woman in a green print dress holding a white bag'],

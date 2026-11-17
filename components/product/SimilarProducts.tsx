@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { ProductCard } from '@/components/home/ProductCard';
 import { Icon } from '@/components/ui/Icon';
+import { QueryState } from '@/components/ui/QueryState';
+import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 import { Switch } from '@/components/ui/Switch';
 import { Text } from '@/components/ui/Text';
-import { getSimilarProducts } from '@/lib/mock/product';
+import { useSimilarProducts } from '@/lib/queries/products';
 import type { ProductDetail } from '@/lib/types';
 
-/** "Similar Products" with the brand switch and a two-column grid of Home's ProductCard. */
+/** "Similar Products": same category, with the brand switch. A two-column grid of Home's ProductCard. */
 export function SimilarProducts({ product }: { product: ProductDetail }) {
   const [otherBrands, setOtherBrands] = useState(false);
-  const items = getSimilarProducts(product, otherBrands);
+  const similar = useSimilarProducts(product, otherBrands);
+  const items = similar.data ?? [];
 
   return (
     <View className="gap-4 rounded-xl bg-card p-4">
@@ -21,15 +24,24 @@ export function SimilarProducts({ product }: { product: ProductDetail }) {
         </View>
         <Switch label="Include from other brands" value={otherBrands} onValueChange={setOtherBrands} />
       </View>
-      {items.length ? (
+      <QueryState
+        isLoading={similar.isLoading}
+        isError={similar.isError}
+        onRetry={() => void similar.refetch()}
+        isEmpty={items.length === 0}
+        emptyText="No similar products yet."
+        skeleton={
+          <View className="flex-row justify-between">
+            <ProductCardSkeleton className="w-[48.5%]" />
+            <ProductCardSkeleton className="w-[48.5%]" />
+          </View>
+        }>
         <View className="flex-row flex-wrap justify-between gap-y-4">
           {items.map((p) => (
             <ProductCard key={p.id} product={p} onGrey className="w-[48.5%]" />
           ))}
         </View>
-      ) : (
-        <Text className="text-primary-hover">No similar products yet.</Text>
-      )}
+      </QueryState>
     </View>
   );
 }

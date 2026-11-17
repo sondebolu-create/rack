@@ -1,7 +1,7 @@
 import { Pressable, ScrollView } from 'react-native';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
-import type { StoreCategory } from '@/lib/mock/store';
+import type { StoreCategory } from '@/lib/categories';
 
 export type CategoryTabsProps = {
   categories: StoreCategory[];

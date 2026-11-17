@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       order_fulfillments: {
         Row: {
+          cancel_reason: string | null
+          history: Json
           id: string
           order_id: string
           shop_id: string
@@ -23,6 +25,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancel_reason?: string | null
+          history?: Json
           id?: string
           order_id: string
           shop_id: string
@@ -30,6 +34,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancel_reason?: string | null
+          history?: Json
           id?: string
           order_id?: string
           shop_id?: string
@@ -469,6 +475,7 @@ export type Database = {
       owns_product: { Args: { p_product_id: string }; Returns: boolean }
       owns_shop: { Args: { p_shop_id: string }; Returns: boolean }
       owns_shop_folder: { Args: { p_folder: string }; Returns: boolean }
+      slug_available: { Args: { p_shop_id?: string; p_slug: string }; Returns: boolean }
       place_order: { Args: { delivery: Json; items: Json }; Returns: string }
       product_is_public: { Args: { p_product_id: string }; Returns: boolean }
       vendor_has_order: { Args: { p_order_id: string }; Returns: boolean }
