@@ -6,9 +6,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ConsentBanner } from '@/components/consent/ConsentBanner';
+import { PrivacyChoicesSheet } from '@/components/consent/PrivacyChoicesSheet';
 import { usePageViews } from '@/lib/analytics';
 import { useStartAuth } from '@/lib/auth';
 import { fonts } from '@/lib/fonts';
+import { hydrateConsent } from '@/lib/consent';
 import { queryClient } from '@/lib/queries/client';
 
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +21,10 @@ export default function RootLayout() {
   // Restores the stored session (survives restarts and refreshes) and listens for sign in and out.
   useStartAuth();
   usePageViews();
+  // Read the saved analytics choice from the device (client only; the server has no device).
+  useEffect(() => {
+    void hydrateConsent();
+  }, []);
 
   useEffect(() => {
     // Hide on error too so a missing font never leaves the app stuck on the splash.
@@ -32,6 +39,9 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       {/* (shopper) adds the phone-width frame; a future (vendor) group will use SidebarLayout instead. */}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }} />
+      {/* Analytics choice: asked once, changeable from any "Privacy choices" link. */}
+      <ConsentBanner />
+      <PrivacyChoicesSheet />
     </SafeAreaProvider>
     </QueryClientProvider>
   );

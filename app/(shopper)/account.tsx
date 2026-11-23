@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { signOut, useAuthStore } from '@/lib/auth';
+import { useConsent } from '@/lib/consent';
 
 /** Simple account screen (M1): who you are, where else you can go, and sign out. Sign-in is enforced by the shopper layout. */
 export default function Account() {
@@ -14,6 +15,7 @@ export default function Account() {
   const role = useAuthStore((s) => s.role);
   const application = useAuthStore((s) => s.application);
   const [busy, setBusy] = useState(false);
+  const openChoices = useConsent((c) => c.openChoices);
 
   const out = async () => {
     setBusy(true);
@@ -40,9 +42,10 @@ export default function Account() {
           <Button variant="secondary" label="Sell on Rack" onPress={() => router.push('/vendor/apply')} />
         ) : null}
         <Button variant="primary" arrow label="Sign out" loading={busy} onPress={out} />
-        <View className="flex-row justify-center gap-6">
+        <View className="flex-row flex-wrap justify-center gap-x-4">
           <Button variant="ghost" fullWidth={false} label="Terms" onPress={() => router.push('/terms')} />
           <Button variant="ghost" fullWidth={false} label="Privacy" onPress={() => router.push('/privacy')} />
+          <Button variant="ghost" fullWidth={false} label="Privacy choices" onPress={openChoices} />
         </View>
       </View>
     </Screen>

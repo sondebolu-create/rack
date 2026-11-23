@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { AuthBackdrop } from '@/components/auth/AuthBackdrop';
 import { OptionRow } from '@/components/auth/OptionRow';
 import { AuthLink } from '@/components/auth/EmailField';
+import { LegalFooter } from '@/components/legal/LegalFooter';
 import { Image } from '@/components/ui/Image';
 import { usePageTitle } from '@/lib/usePageTitle';
 
@@ -39,6 +40,7 @@ export default function Onboarding() {
         />
         {/* Not in Figma: guests may browse Home, stores and products without an account. */}
         <AuthLink label="Browse as a guest" onPress={() => router.replace('/home')} />
+        <LegalFooter dark />
       </View>
     </AuthBackdrop>
   );

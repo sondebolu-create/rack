@@ -6,6 +6,7 @@ import { HomeHeader } from '@/components/home/HomeHeader';
 import { ProductCard } from '@/components/home/ProductCard';
 import { SectionTitle } from '@/components/home/SectionTitle';
 import { SponsoredHero } from '@/components/home/SponsoredHero';
+import { LegalFooter } from '@/components/legal/LegalFooter';
 import { QueryState } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
 import { ProductCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
@@ -27,6 +28,7 @@ export default function Home() {
         <View className="gap-6 pb-16 pt-3">
           <HomeHeader cartHasItems={cartCount > 0} query={query} onQueryChange={setQuery} />
           {searching ? <SearchResults text={debounced} /> : <Feed />}
+          <LegalFooter />
         </View>
       </Screen>
       <AskRackgptPill />

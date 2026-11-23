@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SidebarLayout } from '@/components/ui/SidebarLayout';
 import { Text } from '@/components/ui/Text';
 import { signOut, useAuthStore } from '@/lib/auth';
+import { useConsent } from '@/lib/consent';
 import { useNewOrderCount } from '@/lib/fulfillments';
 import { usePageTitle } from '@/lib/usePageTitle';
 
@@ -54,6 +55,7 @@ export function VendorShell({ title, links, children }: { title: string; links?:
   const router = useRouter();
   const pathname = usePathname();
   const role = useAuthStore((s) => s.role);
+  const openChoices = useConsent((c) => c.openChoices);
   usePageTitle(title);
 
   // New-order badge: re-counted whenever a page (re)opens. TODO(notifications): email / push for new orders.
@@ -72,6 +74,7 @@ export function VendorShell({ title, links, children }: { title: string; links?:
     })),
     { label: 'View app', onPress: () => router.navigate('/home') },
     { label: 'Account', onPress: () => router.navigate('/account') },
+    { label: 'Privacy choices', onPress: openChoices },
     { label: 'Sign out', onPress: out },
   ];
 

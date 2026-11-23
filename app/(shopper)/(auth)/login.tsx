@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AuthBackdrop } from '@/components/auth/AuthBackdrop';
 import { AuthLink, AuthSubmit, EmailField, FieldError, PasswordField } from '@/components/auth/EmailField';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { LegalFooter } from '@/components/legal/LegalFooter';
 import { track } from '@/lib/analytics';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
@@ -184,6 +185,7 @@ export default function Login() {
             </View>
           </View>
         ) : null}
+        <LegalFooter dark />
       </View>
     </AuthBackdrop>
   );
