@@ -11,13 +11,30 @@ import { Icon } from '@/components/ui/Icon';
 import { KeyboardAvoid } from '@/components/ui/KeyboardAvoid';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { ComingSoonPanel } from '@/components/ui/ComingSoon';
 import { useCartTotals } from '@/lib/cart';
+import { RACKGPT_ENABLED } from '@/lib/flags';
 
 /**
  * RackGPT (G1-G4): empty, attachment, analyzing, results. Figma 318:1332, 318:2424, 318:2975, 318:3038, 318:3111.
  * Processing and matches are mock until the vision model and pgvector land in Week 2.
  */
-export default function RackGpt() {
+export default function RackGptTab() {
+  return RACKGPT_ENABLED ? <RackGpt /> : <RackGptSoon />;
+}
+
+/** RackGPT switched off (lib/flags.ts): what it is, and a waitlist signup. No results, no mock data. */
+function RackGptSoon() {
+  return (
+    <Screen accessibilityLabel="RackGPT" pageTitle="RackGPT coming soon">
+      <View className="flex-1 justify-center pb-16">
+        <ComingSoonPanel feature="rackgpt" />
+      </View>
+    </Screen>
+  );
+}
+
+function RackGpt() {
   const s = useRackgptSession();
   const router = useRouter();
   const totals = useCartTotals();

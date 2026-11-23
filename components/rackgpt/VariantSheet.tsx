@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { Sheet } from '@/components/ui/Sheet';
 import { Text } from '@/components/ui/Text';
+import { track } from '@/lib/analytics';
 import { useCartStore } from '@/lib/cart';
 import { formatPrice } from '@/lib/format';
 import { useProduct } from '@/lib/queries/products';
@@ -50,6 +51,7 @@ function Picker({ match, onClose }: { match: OutfitMatch; onClose: () => void })
     const variant = variants.find((v) => v.size === size && v.color === color);
     if (!variant || variant.stock <= 0) return;
     add(match, variant.id, size, color, 1, variant.stock);
+    track('add_to_cart', { source: 'rackgpt' });
     onClose();
   };
 

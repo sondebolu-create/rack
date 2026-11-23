@@ -3,14 +3,24 @@ import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { BrandStore, categoriesFor } from '@/components/store/BrandStore';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { shopMetadata } from '@/lib/server/share';
 import { QueryState } from '@/components/ui/QueryState';
 import { Screen } from '@/components/ui/Screen';
-import { ScreenPlaceholder } from '@/components/ui/ScreenPlaceholder';
+import { NotFound } from '@/components/ui/NotFound';
 import type { GenderFilter } from '@/lib/categories';
 import { useShop, useShopProducts, type ShopRow } from '@/lib/queries/products';
 
 /** M3 Brand store route, loaded by slug. The screen itself is components/store/BrandStore (the vendor's preview uses it too). */
+/** Share-preview tags (title, description, image) for link crawlers. Runs on the web server for each request. */
+export async function generateMetadata(_request: unknown, params: Record<string, string>) {
+  return shopMetadata(params.id);
+}
+
 export default function Store() {
+  return <StoreLoader />;
+}
+
+function StoreLoader() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const shop = useShop(id);
   if (shop.isLoading) {
@@ -35,7 +45,7 @@ export default function Store() {
       </Screen>
     );
   }
-  if (!shop.data) return <ScreenPlaceholder name="Brand not found" req="M3" back />;
+  if (!shop.data) return <NotFound title="Store not found" body="It may have gone offline, or the link is wrong." />;
   return <LiveStore shop={shop.data} />;
 }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ColorSwatches } from '@/components/product/ColorSwatches';
 import { CheckoutBar } from '@/components/product/CheckoutBar';
@@ -13,16 +13,30 @@ import { TryOnFlow } from '@/components/tryon/TryOnFlow';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
-import { ScreenPlaceholder } from '@/components/ui/ScreenPlaceholder';
+import { NotFound } from '@/components/ui/NotFound';
 import { Text } from '@/components/ui/Text';
 import { maxQtyFor, useCartItem, useCartStore, useCartTotals } from '@/lib/cart';
 import { useProduct } from '@/lib/queries/products';
 import { formatPrice } from '@/lib/format';
 import type { ImageSource, ProductDetail, Size } from '@/lib/types';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { productMetadata } from '@/lib/server/share';
+import { ComingSoonSheet } from '@/components/ui/ComingSoon';
+import { track } from '@/lib/analytics';
+import { REPORT_EMAIL } from '@/lib/config';
+import { TRYON_ENABLED } from '@/lib/flags';
 import { QueryState } from '@/components/ui/QueryState';
 
+/** Share-preview tags (title, description, image) for link crawlers. Runs on the web server for each request. */
+export async function generateMetadata(_request: unknown, params: Record<string, string>) {
+  return productMetadata(params.id);
+}
+
 export default function Product() {
+  return <ProductLoader />;
+}
+
+function ProductLoader() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const q = useProduct(id);
   if (q.isLoading) {
@@ -48,7 +62,7 @@ export default function Product() {
       </Screen>
     );
   }
-  if (!q.data) return <ScreenPlaceholder name="Product not found" req="M4" back />;
+  if (!q.data) return <NotFound title="Product not found" body="It may have been removed, or the link is wrong." />;
   return <ProductView product={q.data} />;
 }
 
@@ -62,6 +76,7 @@ function ProductView({ product }: { product: ProductDetail }) {
   const [color, setColor] = useState<string | null>(null);
   const [triedToAdd, setTriedToAdd] = useState(false);
   const [tryOnOpen, setTryOnOpen] = useState(false);
+  const [soonOpen, setSoonOpen] = useState(false);
   // The try-on flow (M5) shares size, colour and qty with this screen, so "Add to cart" there is the same cart.
   const [tryOn, setTryOn] = useState<{ photo: ImageSource | null } | null>(null);
 
@@ -99,6 +114,7 @@ function ProductView({ product }: { product: ProductDetail }) {
     if (available <= 0) return; // sold out: the pills and swatches are disabled, this is the backstop
     if (!variant) return;
     addItem(product, variant.id, size, color, 1, variant.stock);
+    track('add_to_cart', { category: product.category ?? 'unknown' });
   };
   const setQty = (next: number) => {
     if (lineId) setLineQty(lineId, next);
@@ -145,7 +161,7 @@ function ProductView({ product }: { product: ProductDetail }) {
                   accessibilityRole="button"
                   accessibilityLabel="Try it on"
                   hitSlop={8}
-                  onPress={() => setTryOnOpen(true)}
+                  onPress={() => (TRYON_ENABLED ? setTryOnOpen(true) : setSoonOpen(true))}
                   className="min-h-8 flex-row items-center gap-0.5 rounded-lg bg-card px-2 py-1">
                   <Icon name="cameraDark" size={12} />
                   <Text weight="medium">Try it on</Text>
@@ -186,6 +202,7 @@ function ProductView({ product }: { product: ProductDetail }) {
             <View className="pt-4">
               <SimilarProducts product={product} />
             </View>
+            <ReportListing product={product} />
             {/* Keeps the last row clear of the floating checkout bar. */}
             {inCart ? <View className="h-20" /> : null}
           </View>
@@ -201,6 +218,8 @@ function ProductView({ product }: { product: ProductDetail }) {
           onCheckout={() => router.push('/cart')}
         />
       ) : null}
+
+      <ComingSoonSheet feature="tryon" visible={soonOpen} onClose={() => setSoonOpen(false)} />
 
       <TryOnSheet
         visible={tryOnOpen}
@@ -223,5 +242,21 @@ function ProductView({ product }: { product: ProductDetail }) {
         />
       ) : null}
     </View>
+  );
+}
+
+/** "Report this listing": opens the shopper's email app addressed to Rack, with the product named in the subject. */
+function ReportListing({ product }: { product: ProductDetail }) {
+  if (!REPORT_EMAIL) return null;
+  const subject = encodeURIComponent(`Report listing: ${product.name} (${product.id})`);
+  const body = encodeURIComponent(`Listing: ${product.name} by ${product.vendorName}\nProduct id: ${product.id}\n\nWhat is wrong with it?\n`);
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`Report the listing ${product.name}`}
+      onPress={() => void Linking.openURL(`mailto:${REPORT_EMAIL}?subject=${subject}&body=${body}`)}
+      className="min-h-11 items-center justify-center">
+      <Text className="text-xs text-primary-hover underline">Report this listing</Text>
+    </Pressable>
   );
 }

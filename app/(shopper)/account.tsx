@@ -40,6 +40,10 @@ export default function Account() {
           <Button variant="secondary" label="Sell on Rack" onPress={() => router.push('/vendor/apply')} />
         ) : null}
         <Button variant="primary" arrow label="Sign out" loading={busy} onPress={out} />
+        <View className="flex-row justify-center gap-6">
+          <Button variant="ghost" fullWidth={false} label="Terms" onPress={() => router.push('/terms')} />
+          <Button variant="ghost" fullWidth={false} label="Privacy" onPress={() => router.push('/privacy')} />
+        </View>
       </View>
     </Screen>
   );

@@ -2,13 +2,15 @@ import { ActivityIndicator, View } from 'react-native';
 import { Redirect, Stack, usePathname } from 'expo-router';
 import { AppFrame } from '@/components/ui/AppFrame';
 import { useAuthStore } from '@/lib/auth';
+import { RACKGPT_ENABLED } from '@/lib/flags';
 import { colors } from '@/theme';
 
 /**
  * Shopper routes that need an account. Everything else (Home, stores, products, cart) is open to guests.
  * One list here, so a new checkout-side screen can't be forgotten. Data is protected by RLS regardless.
  */
-const SIGN_IN_REQUIRED = ['/checkout', '/review', '/rackgpt', '/orders', '/order', '/account'];
+// RackGPT is only gated while it is switched on; its coming-soon screen is open to guests.
+const SIGN_IN_REQUIRED = ['/checkout', '/review', ...(RACKGPT_ENABLED ? ['/rackgpt'] : []), '/orders', '/order', '/account'];
 
 /** Sits beside the Stack (not around it) so moving between open and protected screens never remounts navigation. */
 function SignInGuard() {

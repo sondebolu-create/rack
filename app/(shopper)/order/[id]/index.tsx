@@ -9,6 +9,8 @@ import { Text } from '@/components/ui/Text';
 import { formatDate, formatPrice } from '@/lib/format';
 import { QueryState } from '@/components/ui/QueryState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { RESERVE_NOTE } from '@/lib/copy';
+import { PAYMENTS_ENABLED } from '@/lib/flags';
 import { useOrderDetail } from '@/lib/queries/orders';
 
 /** M8 Order Confirmed. Figma 318:4474. */
@@ -72,9 +74,9 @@ export default function OrderConfirmed() {
           </View>
           <View accessible accessibilityRole="header" className="items-center gap-1">
             <Text weight="medium" className="text-xl">
-              Your order is reserved
+              {PAYMENTS_ENABLED ? 'Your order has been confirmed' : 'Your order is reserved'}
             </Text>
-            <Text className="text-muted">The vendor will contact you to arrange delivery and payment.</Text>
+            <Text className="text-center text-muted">{PAYMENTS_ENABLED ? 'Thank you for your purchase' : RESERVE_NOTE}</Text>
           </View>
         </View>
 
@@ -120,7 +122,7 @@ export default function OrderConfirmed() {
           </View>
           <View className="flex-row items-center justify-between border-t border-line pt-2">
             <Text weight="medium" className="text-xs text-primary-hover">
-              Total
+              {PAYMENTS_ENABLED ? 'Total Paid' : 'Total'}
             </Text>
             <Text weight="medium" className="text-xs">
               {formatPrice(order.total_minor, order.currency)}

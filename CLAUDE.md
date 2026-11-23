@@ -8,7 +8,7 @@ Rack is an agentic fashion marketplace for Lagos. Shoppers describe, upload or p
 
 ## Stack
 
-- **App:** Expo (latest SDK) + TypeScript (strict) + Expo Router (file-based routes in `app/`). **Rack launches as a web app first**, and iOS (Expo Go / TestFlight) is the other target. Web output is `single` (one `index.html`, client-rendered).
+- **App:** Expo (latest SDK) + TypeScript (strict) + Expo Router (file-based routes in `app/`). **Rack launches as a web app first**, and iOS (Expo Go / TestFlight) is the other target. Web output is `server` (Expo Router renders pages on a Node server, so product and store pages ship Open Graph tags in their HTML for WhatsApp, X and Instagram previews). It needs a Node host (for example EAS Hosting): `npm run web:build` produces `dist/client` + `dist/server`, and `npx expo serve` runs it locally. Route files may export `generateMetadata`; keep module-level code safe to run with no `window` (see `lib/storage.ts`).
 - **Styling:** NativeWind v4. Use Tailwind classes only. No inline style objects except for dynamic values such as animated or computed sizes.
 - **Backend:** Supabase for Postgres, Auth, Storage and pgvector. Schema changes go through migrations in `supabase/migrations/`, never ad-hoc SQL.
 - **State and data:** TanStack Query for server state; Zustand only for local UI state (cart drawer, RackGPT session).
@@ -21,7 +21,8 @@ Rack is an agentic fashion marketplace for Lagos. Shoppers describe, upload or p
 npx expo start              # dev server
 npx expo start --ios        # iOS simulator
 npx expo start --web        # browser (use this to check every screen, see Platforms)
-npm run web:build           # regenerate public/index.html + manifest from theme/tokens.js, then export to dist/
+npm run web:build           # regenerate public/index.html + manifest from theme/tokens.js, then export to dist/ (client + server)
+npx expo serve              # run the exported dist/ locally (check share tags with curl)
 npx tsc --noEmit            # typecheck. Run it before saying a task is done
 npx expo lint               # lint
 supabase migration new <name>

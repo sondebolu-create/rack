@@ -11,6 +11,9 @@ import { useCheckoutStore, useSelectedAddress } from '@/lib/checkout';
 import { useProfile } from '@/lib/queries/profile';
 import { usePlaceOrder, type PlaceOrderError } from '@/lib/queries/orders';
 import { Button } from '@/components/ui/Button';
+import { track } from '@/lib/analytics';
+import { RESERVE_NOTE } from '@/lib/copy';
+import { PAYMENTS_ENABLED } from '@/lib/flags';
 
 /** M8 Review Order. Figma 318:4386. "Proceed to Payment" calls place_order. Payment itself is mock until Paystack (Week 3). */
 export default function Review() {
@@ -28,7 +31,7 @@ export default function Review() {
   if (items.length === 0) {
     if (placed) return null;
     return (
-      <FlowScreen title="Review Order">
+      <FlowScreen title={PAYMENTS_ENABLED ? 'Review Order' : 'Review Reservation'}>
         <Text>Your cart is empty.</Text>
       </FlowScreen>
     );
@@ -50,6 +53,7 @@ export default function Review() {
       setFailure(result.error);
       return;
     }
+    track('reservation_placed', { shops: new Set(items.map((i) => i.product.vendorId)).size, items: items.length });
     setPlaced(true);
     useCartStore.getState().clear();
     useCheckoutStore.getState().reset();
@@ -63,8 +67,9 @@ export default function Review() {
 
   return (
     <FlowScreen
-      title="Review Order"
-      cta={{ label: place.isPending ? 'Placing order…' : 'Proceed to Payment', onPress: () => void placeOrder(), disabled: missingAddress || place.isPending }}>
+      title={PAYMENTS_ENABLED ? 'Review Order' : 'Review Reservation'}
+      subtitle={PAYMENTS_ENABLED ? undefined : RESERVE_NOTE}
+      cta={{ label: place.isPending ? (PAYMENTS_ENABLED ? 'Placing order…' : 'Reserving…') : PAYMENTS_ENABLED ? 'Proceed to Payment' : 'Reserve', onPress: () => void placeOrder(), disabled: missingAddress || place.isPending }}>
       {failure ? (
         <View accessibilityRole="alert" className="gap-2 rounded-lg border border-danger p-3">
           <Text weight="medium">
@@ -103,6 +108,7 @@ export default function Review() {
         ) : null}
       </View>
 
+      {PAYMENTS_ENABLED ? (
       <View className="gap-4">
         <Text weight="medium">Payment</Text>
         <View accessible className="flex-row items-start gap-2.5">
@@ -112,6 +118,7 @@ export default function Review() {
           </Text>
         </View>
       </View>
+      ) : null}
 
       <AddressSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} />
     </FlowScreen>

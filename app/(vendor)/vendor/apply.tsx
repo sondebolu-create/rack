@@ -11,6 +11,7 @@ import {
   StepProgress,
   STEP_TITLES,
 } from '@/components/vendor/ApplicationSteps';
+import { track } from '@/lib/analytics';
 import { refreshProfile, useAuthStore } from '@/lib/auth';
 import {
   EMPTY_FORM,
@@ -57,6 +58,7 @@ export default function VendorApply() {
       setSubmitting(false);
       return setSubmitError(error);
     }
+    track('vendor_application_submitted', { categories: form.categories.length, photos: form.photos.length });
     await refreshProfile();
     router.replace('/vendor/application');
   };

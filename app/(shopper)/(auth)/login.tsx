@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AuthBackdrop } from '@/components/auth/AuthBackdrop';
 import { AuthLink, AuthSubmit, EmailField, FieldError, PasswordField } from '@/components/auth/EmailField';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { track } from '@/lib/analytics';
 import { Image } from '@/components/ui/Image';
 import { Text } from '@/components/ui/Text';
 import { GOOGLE_AUTH_ENABLED, authRedirectUrl, landingFor, safeRedirect, useAuthStore, type Intent } from '@/lib/auth';
@@ -70,6 +71,7 @@ export default function Login() {
           options: { emailRedirectTo: authRedirectUrl('/login') },
         });
         if (error) return setErrors({ form: friendly(error.message) });
+        track('sign_up', { intent });
         // With email confirmation on, an existing address comes back as a user with no identities.
         if (data.user && data.user.identities?.length === 0) {
           return setErrors({ email: 'An account with this email already exists. Log in instead.' });
@@ -172,6 +174,16 @@ export default function Login() {
           }}
         />
         {!creating ? <AuthLink label="Forgot password?" onPress={() => router.push('/forgot-password')} /> : null}
+        {creating ? (
+          <View className="mt-1 items-center">
+            <Text className="text-center text-xs text-inverse-icon">By creating an account you agree to our</Text>
+            <View className="flex-row items-center gap-1">
+              <AuthLink label="Terms" onPress={() => router.push('/terms')} />
+              <Text className="text-xs text-inverse-icon">and</Text>
+              <AuthLink label="Privacy Policy" onPress={() => router.push('/privacy')} />
+            </View>
+          </View>
+        ) : null}
       </View>
     </AuthBackdrop>
   );

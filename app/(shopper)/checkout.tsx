@@ -10,6 +10,8 @@ import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/Input';
 import { internationalDigits } from '@/lib/phone';
 import { useProfile } from '@/lib/queries/profile';
+import { RESERVE_NOTE } from '@/lib/copy';
+import { PAYMENTS_ENABLED } from '@/lib/flags';
 import { Text } from '@/components/ui/Text';
 import { summariseCard, validateCard, type CardErrors, type CardFields } from '@/lib/card';
 import { useCartStore } from '@/lib/cart';
@@ -41,27 +43,30 @@ export default function Checkout() {
 
   const review = () => {
     setTried(true);
-    const errors = payment === 'card' ? validateCard(card) : {};
+    const errors = PAYMENTS_ENABLED && payment === 'card' ? validateCard(card) : {};
     setCardErrors(errors);
     const contact: { name?: string; phone?: string } = {};
     if (contactName.trim().length < 2) contact.name = 'Enter the name for this order.';
     if (!internationalDigits(contactPhone)) contact.phone = 'Enter a phone number the seller can call, like 0803 123 4567.';
     setContactErrors(contact);
     if (needsAddress || Object.keys(errors).length > 0 || Object.keys(contact).length > 0) return;
-    setCard(payment === 'card' ? summariseCard(card) : null);
+    setCard(PAYMENTS_ENABLED && payment === 'card' ? summariseCard(card) : null);
     router.push('/review');
   };
 
   if (!hasItems) {
     return (
-      <FlowScreen title="Checkout">
-        <Text>Your cart is empty. Add something before checking out.</Text>
+      <FlowScreen title={PAYMENTS_ENABLED ? 'Checkout' : 'Reserve'}>
+        <Text>Your cart is empty. Add something before you reserve.</Text>
       </FlowScreen>
     );
   }
 
   return (
-    <FlowScreen title="Checkout" cta={{ label: 'Review Order', onPress: review }}>
+    <FlowScreen
+      title={PAYMENTS_ENABLED ? 'Checkout' : 'Reserve'}
+      subtitle={PAYMENTS_ENABLED ? undefined : RESERVE_NOTE}
+      cta={{ label: PAYMENTS_ENABLED ? 'Review Order' : 'Review Reservation', onPress: review }}>
       {/* Not in Figma: place_order needs a name and a phone number, and the seller calls or WhatsApps it to arrange delivery. */}
       <View className="gap-3">
         <Text weight="medium">Contact</Text>
@@ -123,6 +128,7 @@ export default function Checkout() {
         </View>
       ) : null}
 
+      {PAYMENTS_ENABLED ? (
       <View className="gap-4">
         <Text weight="medium">Payment Method</Text>
         <View accessibilityRole="radiogroup" accessibilityLabel="Payment method">
@@ -135,6 +141,7 @@ export default function Checkout() {
           <Text className="text-muted">You will get the bank details after you place your order.</Text>
         )}
       </View>
+      ) : null}
 
       <AddressSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} />
     </FlowScreen>

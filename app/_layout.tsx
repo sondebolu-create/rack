@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { usePageViews } from '@/lib/analytics';
 import { useStartAuth } from '@/lib/auth';
 import { fonts } from '@/lib/fonts';
 import { queryClient } from '@/lib/queries/client';
@@ -16,6 +17,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts(fonts);
   // Restores the stored session (survives restarts and refreshes) and listens for sign in and out.
   useStartAuth();
+  usePageViews();
 
   useEffect(() => {
     // Hide on error too so a missing font never leaves the app stuck on the splash.

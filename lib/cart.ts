@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { formatPrice, type Currency } from '@/lib/format';
 import type { LineCheck } from '@/lib/queries/cart';
+import { appStorage } from '@/lib/storage';
 import type { ProductCardData, Size } from '@/lib/types';
 
 /** Most of one variant a shopper can hold. */
@@ -103,7 +103,7 @@ export const useCartStore = create<CartState>()(
     {
       name: 'rack-cart',
       version: 2,
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => appStorage),
       partialize: (s) => ({ items: s.items }),
       // v1 carts (in memory only) never reached storage, and carts without variant ids can't be ordered: start clean.
       migrate: () => ({ items: [] }),
