@@ -44,6 +44,11 @@ const ICONS = {
   receipt: require('@/assets/icons/receipt.svg'),
   dotOff: require('@/assets/icons/dot-off.svg'),
   dotOn: require('@/assets/icons/dot-on.svg'),
+  // Bottom tab bar. Drawn in black and always tinted by the tab bar.
+  tabHome: require('@/assets/icons/tab-home.svg'),
+  tabRack: require('@/assets/icons/tab-rack.svg'),
+  tabCart: require('@/assets/icons/tab-cart.svg'),
+  tabSettings: require('@/assets/icons/tab-settings.svg'),
   // Brand store category tabs (M3).
   catAll: require('@/assets/icons/cat-all.svg'),
   catShoes: require('@/assets/icons/cat-shoes.svg'),

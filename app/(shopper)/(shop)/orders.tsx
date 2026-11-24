@@ -1,7 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FlowScreen } from '@/components/checkout/FlowScreen';
-import { Button } from '@/components/ui/Button';
 import { QueryState } from '@/components/ui/QueryState';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Text } from '@/components/ui/Text';
@@ -16,14 +15,14 @@ function summary(o: MyOrder): string {
   return 'In progress';
 }
 
-/** Orders tab: this shopper's real orders. There is no Figma frame for it yet. */
+/** Orders (opened from Settings): this shopper's real orders. There is no Figma frame for it yet. */
 export default function Orders() {
   const router = useRouter();
   const q = useMyOrders();
   const orders = q.data ?? [];
 
   return (
-    <FlowScreen back={false} title="Orders" subtitle={q.data ? `${orders.length} ${orders.length === 1 ? 'order' : 'orders'}` : undefined}>
+    <FlowScreen title="Orders" subtitle={q.data ? `${orders.length} ${orders.length === 1 ? 'order' : 'orders'}` : undefined}>
       <QueryState
         isLoading={q.isLoading}
         isError={q.isError}
@@ -57,8 +56,6 @@ export default function Orders() {
           ))}
         </View>
       </QueryState>
-      {/* Not in Figma: the way to the account screen and sign out. */}
-      <Button variant="secondary" label="Account" onPress={() => router.push('/account')} />
     </FlowScreen>
   );
 }

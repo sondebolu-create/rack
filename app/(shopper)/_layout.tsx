@@ -10,7 +10,7 @@ import { colors } from '@/theme';
  * One list here, so a new checkout-side screen can't be forgotten. Data is protected by RLS regardless.
  */
 // RackGPT is only gated while it is switched on; its coming-soon screen is open to guests.
-const SIGN_IN_REQUIRED = ['/checkout', '/review', ...(RACKGPT_ENABLED ? ['/rackgpt'] : []), '/orders', '/order', '/account'];
+const SIGN_IN_REQUIRED = ['/checkout', '/review', ...(RACKGPT_ENABLED ? ['/rackgpt'] : []), '/orders', '/order', '/account', '/settings'];
 
 /** Sits beside the Stack (not around it) so moving between open and protected screens never remounts navigation. */
 function SignInGuard() {

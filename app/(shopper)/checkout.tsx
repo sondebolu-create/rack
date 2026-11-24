@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AddressSheet } from '@/components/checkout/AddressSheet';
@@ -27,10 +27,14 @@ export default function Checkout() {
   const profile = useProfile();
   const [contactErrors, setContactErrors] = useState<{ name?: string; phone?: string }>({});
   // Prefill name and phone from the profile once, and never over something the shopper already typed.
+  const prefilled = useRef(false);
   useEffect(() => {
     const p = profile.data;
-    if (p && !contactName && !contactPhone) setContact({ name: p.full_name ?? '', phone: p.phone ?? '' });
-  }, [profile.data, contactName, contactPhone, setContact]);
+    if (!p || prefilled.current) return;
+    prefilled.current = true;
+    const { contactName: n, contactPhone: ph } = useCheckoutStore.getState();
+    if (!n && !ph) setContact({ name: p.full_name ?? '', phone: p.phone ?? '' });
+  }, [profile.data, setContact]);
   const address = useSelectedAddress();
 
   const [sheetOpen, setSheetOpen] = useState(false);
